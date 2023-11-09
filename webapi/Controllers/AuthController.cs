@@ -15,12 +15,10 @@ namespace webapi
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        private readonly IPersonalMessageService _personalMessageService;
 
-        public AuthController(IAuthService authService, IPersonalMessageService personalMessageService)
+        public AuthController(IAuthService authService)
         {
             _authService = authService;
-            _personalMessageService = personalMessageService;
         }
 
         [HttpPost("signin")]
@@ -37,12 +35,6 @@ namespace webapi
             var response = await _authService.SingupAsync(request);
             if (response.Success) return Ok(response);
             return BadRequest(response);
-        }
-        [Authorize]
-        [HttpPost("test")]
-        public async Task<IEnumerable<PersonalMessageDto>> Test()
-        {
-            return await _personalMessageService.GetAllMessageInDialogAsync(1,2);
         }
     } 
 }
