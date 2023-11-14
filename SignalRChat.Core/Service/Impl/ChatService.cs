@@ -65,7 +65,7 @@ namespace SignalRChat.Core.Services.Impl
             return await _privateMessageRepository.CreateAsync(newMessage);
         }
 
-        public async Task<int> SendMessageToGroupAsync(GroupMessageRequest request)
+        public async Task<int> SendMessageToGroupAsync(GroupMessageDto request)
         {
             var group = await _groupRepository.GetByIdAsync(request.GroupId);
             if (group is not null)

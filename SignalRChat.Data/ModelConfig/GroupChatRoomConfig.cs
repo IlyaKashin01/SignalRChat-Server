@@ -11,7 +11,7 @@ namespace SignalRChat.Data.ModelConfig
             base.Configure(builder);
             builder.ToTable("group_chat_room");
             builder.Property(e => e.Name).HasColumnName("name");
-            builder.Property(e => e.CreatorId).HasColumnName("creator_id");
+            builder.Property(e => e.PersonId).HasColumnName("creator_id");
         }
     }
 }

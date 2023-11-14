@@ -1,4 +1,5 @@
-﻿using SignalRChat.Data.Repositories.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using SignalRChat.Data.Repositories.Interfaces;
 using SignalRChat.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -12,24 +13,27 @@ namespace SignalRChat.Data.Repositories.Impl
     {
         public GroupMessageRepository(AppDbContext dbContext) : base(dbContext) { }
 
-        public Task<IEnumerable<GroupChatRoom>> GetAllGroupAsync(int personId)
+        public async Task<IEnumerable<GroupMessage>> GetAllMessageInGroupAsync(int groupId)
         {
-            throw new NotImplementedException();
+            return await _context.GroupMessages.Where(x => x.GroupId == groupId).ToListAsync();
         }
 
-        public Task<IEnumerable<GroupMessage>> GetAllMessageInGroupAsync(int myId, int petsonId)
+        public async Task<IEnumerable<GroupMessage>> SearchGroupMessageAsync(int groupId, string message)
         {
-            throw new NotImplementedException();
+            return await _context.GroupMessages.Where(x => x.GroupId == groupId && x.Content == message).ToListAsync();
         }
 
-        public Task<IEnumerable<GroupMessage>> SearchGroupMessageAsync()
+        public async Task<bool> UpdateMessage(GroupMessage message)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<GroupMessage> UpdateMessage(GroupMessage message)
-        {
-            throw new NotImplementedException();
+            var groupMessage = await _context.GroupMessages.FirstOrDefaultAsync(x => x.Id == message.Id);
+            if (groupMessage is not null)
+            {
+                groupMessage.Content = message.Content;
+                groupMessage.UpdatedDate = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
         }
     }
 }

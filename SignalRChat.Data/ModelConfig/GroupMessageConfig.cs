@@ -10,7 +10,7 @@ namespace SignalRChat.Data.ModelConfig
         {
             base.Configure(builder);
             builder.ToTable("group_message");
-            builder.Property(e => e.FromUserId).HasColumnName("from_person_id");
+            builder.Property(e => e.SenderId).HasColumnName("sender_id");
             builder.Property(e => e.GroupId).HasColumnName("group_id");
             builder.Property(e => e.Content).HasColumnName("content");
             builder.Property(e => e.SentAt).HasColumnName("sent_at");

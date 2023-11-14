@@ -12,9 +12,8 @@ namespace TravelApi.Infrastructure.Data.Extensions
             modelBuilder.ApplyConfiguration(new PersonalMessageConfig());
             modelBuilder.ApplyConfiguration(new GroupMessageConfig());
             modelBuilder.ApplyConfiguration(new GroupChatRoomConfig());
-            modelBuilder.ApplyConfiguration(new MessageJoinToGroupConfig());
+            modelBuilder.ApplyConfiguration(new GroupMemberConfig());
             modelBuilder.ApplyConfiguration(new PersonConfig());
-            modelBuilder.ApplyConfiguration(new PersonJoinToGroupConfig());
 
             return modelBuilder;
         }
@@ -24,9 +23,8 @@ namespace TravelApi.Infrastructure.Data.Extensions
             modelBuilder.Entity<PersonalMessage>().HasQueryFilter(e => e.DeleteDate == null);
             modelBuilder.Entity<GroupMessage>().HasQueryFilter(e => e.DeleteDate == null);
             modelBuilder.Entity<GroupChatRoom>().HasQueryFilter(e => e.DeleteDate == null);
-            modelBuilder.Entity<MessageJoinToGroup>().HasQueryFilter(e => e.DeleteDate == null);
+            modelBuilder.Entity<GroupMember>().HasQueryFilter(e => e.DeleteDate == null);
             modelBuilder.Entity<Person>().HasQueryFilter(e => e.DeleteDate == null);
-            modelBuilder.Entity<PersonJoinToGroup>().HasQueryFilter(e => e.DeleteDate == null);
 
             return modelBuilder;
         }

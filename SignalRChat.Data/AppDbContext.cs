@@ -11,10 +11,10 @@ namespace SignalRChat.Data
     public class AppDbContext : DbContext
     {
         public DbSet<Person> Users { get; set; }
+        public DbSet<GroupChatRoom> Groups { get; set; }
         public DbSet<PersonalMessage> PersonalMessages { get; set; }
         public DbSet<GroupMessage> GroupMessages { get; set; }
-        public DbSet<GroupChatRoom> Groups { get; set; }
-        public DbSet<PersonJoinToGroup> PersonJoinToGroups { get; set; }
+        public DbSet<GroupMember> GroupMembers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

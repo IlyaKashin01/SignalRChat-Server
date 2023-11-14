@@ -35,7 +35,7 @@ namespace SignalRChat.Core.Service.Impl
             return _mapper.Map<IEnumerable<PersonalMessageDto>>(messages);
         }
 
-        public async Task<int> SendPersonalMessageAsync(PersonalMessageDto request)
+        public async Task<int> SavePersonalMessageAsync(PersonalMessageDto request)
         {
             var person = _mapper.Map<PersonalMessage>(request);
             return await _personalMessageRepository.CreateAsync(person);

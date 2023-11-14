@@ -11,7 +11,10 @@ namespace webapi
         {
             return services
                 .AddScoped<IPersonRepository, PersonRepository>()
-                .AddScoped<IPersonalMessageRepository, PersonalMessageRepository>();
+                .AddScoped<IPersonalMessageRepository, PersonalMessageRepository>()
+                .AddScoped<IGroupMessageRepository, GroupMessageRepository>()
+                .AddScoped<IGroupRepository, GroupRepository>()
+                .AddScoped<IGroupMemberRepository, GroupMemberRepository>();
         }
 
         public static IServiceCollection AddServicesDI(this IServiceCollection services)
@@ -19,7 +22,9 @@ namespace webapi
             return services
                 .AddScoped<IAuthService, AuthService>()
                 .AddScoped<IPersonalMessageService, PersonalMessageService>()
-                .AddScoped<IPersonService, PersonService>();
+                .AddScoped<IPersonService, PersonService>()
+                .AddScoped<IGroupService, GroupService>()
+                .AddScoped<IGroupMessageService, GroupMessageService>();
         }
     }
 }

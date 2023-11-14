@@ -12,7 +12,7 @@ namespace SignalRChat.Core.Services.Interfaces
     public interface IChatService
     {
         Task<int> SendMessageAsync(PersonalMessageDto request);
-        Task<int> SendMessageToGroupAsync(GroupMessageRequest request);
+        Task<int> SendMessageToGroupAsync(GroupMessageDto request);
         Task<int> JoinGroupAsync(GroupRequest request);
         Task LeaveGroupAsync(int userId, string groupName);
         Task<IEnumerable<Person?>> GetUsersInGroupAsync(int groupId);

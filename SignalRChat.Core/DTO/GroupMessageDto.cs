@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace SignalRChat.Core.DTO
 {
-    public class GroupMessageRequest
+    public class GroupMessageDto
     {
         public int GroupId { get; set; }
-        public int FromUserId { get; set; }
+        public int SenderId { get; set; }
         public string Content { get; set; } = string.Empty;
         public DateTime SentAt { get; set; }
     }

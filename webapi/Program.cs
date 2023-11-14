@@ -54,7 +54,6 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-var policy = "defaultCorsPolicy";
 builder.Services.AddCors();
 builder.Services.AddSignalR();
 

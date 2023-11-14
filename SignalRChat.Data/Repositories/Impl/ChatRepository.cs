@@ -26,7 +26,6 @@ namespace SignalRChat.Data.Repositories.Impl
         public async Task<IEnumerable<Person?>> GetUsersInGroupAsync(int groupId)
         {
             return await _context.Groups.Where(x => x.Id == groupId)
-                                        .SelectMany(x => x.Users)
                                         .Select(x => x.Person)
                                         .ToListAsync();
         }

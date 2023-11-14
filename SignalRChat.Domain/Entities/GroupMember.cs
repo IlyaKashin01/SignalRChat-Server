@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 
 namespace SignalRChat.Domain.Entities
 {
-    public class PersonJoinToGroup : BaseEntity
+    public class GroupMember: BaseEntity
     {
-        public Person? Person { get; set; }
-        public int PersonId { get; set; }
         public GroupChatRoom? Group { get; set; }
         public int GroupId { get; set; }
+        public Person Person { get; set; } = new Person();
+        public int PersonId { get; set; }
+        public int AddedByPerson {  get; set; }
+        public DateTime AddedDate { get; set; }
     }
 }

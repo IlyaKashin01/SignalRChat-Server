@@ -9,9 +9,8 @@ namespace SignalRChat.Data.Repositories.Interfaces
 {
     public interface IGroupMessageRepository: IBaseRepository<GroupMessage>
     {
-        Task<IEnumerable<GroupMessage>> GetAllMessageInGroupAsync(int myId, int petsonId);
-        Task<IEnumerable<GroupChatRoom>> GetAllGroupAsync(int personId);
-        Task<IEnumerable<GroupMessage>> SearchGroupMessageAsync();
-        Task<GroupMessage> UpdateMessage(GroupMessage message);
+        Task<IEnumerable<GroupMessage>> GetAllMessageInGroupAsync(int groupId);
+        Task<IEnumerable<GroupMessage>> SearchGroupMessageAsync(int groupId, string message);
+        Task<bool> UpdateMessage(GroupMessage message);
     }
 }

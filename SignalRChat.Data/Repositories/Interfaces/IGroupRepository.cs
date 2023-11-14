@@ -10,5 +10,6 @@ namespace SignalRChat.Data.Repositories.Interfaces
     {
         public Task<GroupChatRoom?> getGroupByNameAndCreatorAsync(string groupName, int CreatorId);
         public Task<GroupChatRoom?> getGroupByNameAndUsersAsync(string groupName, int PersonId);
+        Task<IEnumerable<GroupChatRoom?>> GetAllGroupAsync(int personId);
     }
 }

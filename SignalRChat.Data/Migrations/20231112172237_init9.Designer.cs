@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SignalRChat.Data;
@@ -11,9 +12,11 @@ using SignalRChat.Data;
 namespace SignalRChat.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231112172237_init9")]
+    partial class init9
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,6 +39,10 @@ namespace SignalRChat.Data.Migrations
                         .HasColumnName("created_date")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+                    b.Property<int>("CreatorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("creator_id");
+
                     b.Property<DateTime?>("DeleteDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("delete_date");
@@ -46,8 +53,7 @@ namespace SignalRChat.Data.Migrations
                         .HasColumnName("name");
 
                     b.Property<int>("PersonId")
-                        .HasColumnType("integer")
-                        .HasColumnName("creator_id");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedDate")
                         .ValueGeneratedOnAdd()
@@ -92,9 +98,6 @@ namespace SignalRChat.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("group_id");
 
-                    b.Property<int>("PersonId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("UpdatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -104,8 +107,6 @@ namespace SignalRChat.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("GroupId");
-
-                    b.HasIndex("PersonId");
 
                     b.ToTable("group_member", (string)null);
                 });
@@ -187,6 +188,9 @@ namespace SignalRChat.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("delete_date");
 
+                    b.Property<int?>("GroupMemberId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Login")
                         .IsRequired()
                         .HasColumnType("text")
@@ -209,6 +213,8 @@ namespace SignalRChat.Data.Migrations
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GroupMemberId");
 
                     b.ToTable("person", (string)null);
                 });
@@ -287,15 +293,7 @@ namespace SignalRChat.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SignalRChat.Domain.Entities.Person", "Person")
-                        .WithMany()
-                        .HasForeignKey("PersonId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Group");
-
-                    b.Navigation("Person");
                 });
 
             modelBuilder.Entity("SignalRChat.Domain.Entities.GroupMessage", b =>
@@ -303,6 +301,13 @@ namespace SignalRChat.Data.Migrations
                     b.HasOne("SignalRChat.Domain.Entities.GroupChatRoom", null)
                         .WithMany("GroupMessages")
                         .HasForeignKey("GroupChatRoomId");
+                });
+
+            modelBuilder.Entity("SignalRChat.Domain.Entities.Person", b =>
+                {
+                    b.HasOne("SignalRChat.Domain.Entities.GroupMember", null)
+                        .WithMany("Members")
+                        .HasForeignKey("GroupMemberId");
                 });
 
             modelBuilder.Entity("SignalRChat.Domain.Entities.PersonalMessage", b =>
@@ -315,6 +320,11 @@ namespace SignalRChat.Data.Migrations
             modelBuilder.Entity("SignalRChat.Domain.Entities.GroupChatRoom", b =>
                 {
                     b.Navigation("GroupMessages");
+                });
+
+            modelBuilder.Entity("SignalRChat.Domain.Entities.GroupMember", b =>
+                {
+                    b.Navigation("Members");
                 });
 
             modelBuilder.Entity("SignalRChat.Domain.Entities.Person", b =>
