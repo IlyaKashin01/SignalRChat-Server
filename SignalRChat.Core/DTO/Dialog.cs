@@ -8,9 +8,11 @@ namespace SignalRChat.Core.DTO
 {
     public class Dialog
     {
+        public int Id { get; set; } 
         public string Name { get; set; } = string.Empty;
         public string LastMessage { get; set; } = string.Empty;
         public bool IsCheck { get; set; }
         public DateTime DateTime { get; set; }
+        public bool IsGroup { get; set; }
     }
 }

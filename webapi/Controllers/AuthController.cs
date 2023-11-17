@@ -1,10 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
+﻿using Microsoft.AspNetCore.Mvc;
 using SignalRChat.Common.OperationResult;
-using SignalRChat.Core.Dto;
 using SignalRChat.Core.Dto.Auth;
 using SignalRChat.Core.Service.Interfaces;
 
@@ -15,7 +10,6 @@ namespace webapi
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-
         public AuthController(IAuthService authService)
         {
             _authService = authService;

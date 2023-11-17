@@ -15,8 +15,6 @@ namespace SignalRChat.Core.Mapping
         {
             CreateMap<AuthRequest, Person>();
             CreateMap<SignupRequest, Person>();
-            //CreateMap<PersonRequest, Person>();
-           // CreateMap<PersonRequest, Person>();
 
             CreateMap<Person, AuthResponse>();
             CreateMap<Person, PersonResponse>();

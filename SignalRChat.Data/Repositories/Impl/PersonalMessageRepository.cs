@@ -16,13 +16,14 @@ namespace SignalRChat.Data.Repositories.Impl
         }
         public async Task<IEnumerable<PersonalMessage>> GetAllMessagesInDialogAsync(int myId, int personId)
         {
-            return await _context.PersonalMessages.Where(x => x.SenderId == myId || x.RecipientId == personId &&
-             x.SenderId == personId || x.RecipientId == myId).ToListAsync();
+            return await _context.PersonalMessages.Where(x => (x.SenderId == myId && x.RecipientId == personId) ||
+             (x.SenderId == personId && x.RecipientId == myId)).OrderBy(x => x.SentAt).ToListAsync();
         }
 
         public async Task<IEnumerable<Person>> GetAllPersonalDialogsAsync(int personId)
         {
-            var dialogs = await _context.PersonalMessages.Where(m => m.SenderId == personId || m.RecipientId == personId)
+            var dialogs = await _context.PersonalMessages
+            .Where(m => m.SenderId == personId || m.RecipientId == personId)
             .Select(m => m.SenderId)
             .Union(_context.PersonalMessages.Where(m => m.SenderId == personId || m.RecipientId == personId)
             .Select(m => m.RecipientId))
