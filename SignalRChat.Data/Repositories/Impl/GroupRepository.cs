@@ -20,15 +20,12 @@ namespace SignalRChat.Data.Repositories.Impl
                 .ToListAsync();
         }
 
-        public async Task<GroupChatRoom?> getGroupByNameAndCreatorAsync(string groupName, int CreatorId)
+        public async Task<int> GetCreatorIdAsync(int groupId)
         {
-            return await _context.Groups.FirstOrDefaultAsync(x => x.Name == groupName && x.PersonId == CreatorId);
-        }
-
-        public async Task<GroupChatRoom?> getGroupByNameAndUsersAsync(string groupName, int PersonId)
-        {
-            return await _context.Groups.Where(x => x.Name == groupName)
-                                        .FirstOrDefaultAsync(x => x.Id == PersonId);
+            var id = await _context.Groups.Where(x => x.Id == groupId).Select(x => x.PersonId).FirstOrDefaultAsync();
+            if (id != 0)
+                return id;
+            return 0;
         }
     }
 }

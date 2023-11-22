@@ -23,7 +23,7 @@ namespace SignalRChat.Core.Mapping
             CreateMap<GroupMessage, GroupMessageDto>();
 
             CreateMap<MemberRequest, GroupMember>();
-            CreateMap<GroupMember, MemberResponse>();
+            CreateMap<GroupMember, MemberInGroup>();
         }
     }
 }

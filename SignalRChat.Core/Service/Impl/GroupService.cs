@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using SignalRChat.Core.Dto;
+using SignalRChat.Core.Dto.Auth;
 using SignalRChat.Core.DTO;
 using SignalRChat.Core.Service.Interfaces;
 using SignalRChat.Data.Repositories.Interfaces;
@@ -58,10 +59,36 @@ namespace SignalRChat.Core.Service.Impl
             return _mapper.Map<GroupResponse>(group);
         }
 
-        public async Task<IEnumerable<MemberResponse>> GetAllMembersInGroupAsync(int groupId)
+        public async Task<IEnumerable<MemberInGroup>> GetAllMembersInGroupAsync(int groupId)
         {
             var members = await _memberRepository.GetAllGroupMembersAsync(groupId);
-            return _mapper.Map<IEnumerable<MemberResponse>>(members);
+            
+            var groupMembers = new List<MemberInGroup>();
+            foreach (var member in members)
+            {
+                var tempMember = await _personRepository.GetByIdAsync(member.PersonId);
+                var addedByPerson = await _personRepository.GetByIdAsync(member.AddedByPerson);
+                if(tempMember != null && addedByPerson != null)
+                {
+                    var memberResponse = _mapper.Map<MemberInGroup>(member);
+                    memberResponse.MemberLogin = tempMember.Login;
+                    memberResponse.AddedByPersonLogin = addedByPerson.Login;
+                    groupMembers.Add(memberResponse);
+                }
+            }
+            return groupMembers;
+        }
+
+        public async Task<string> GetCreatorLoginAsync(int groupId)
+        {
+            var creatorId = await _groupRepository.GetCreatorIdAsync(groupId);
+            if(creatorId != 0)
+            {
+                var person = await _personRepository.GetByIdAsync(creatorId);
+                if(person != null)
+                    return person.Login;
+            }
+            return "";
         }
     }
 }

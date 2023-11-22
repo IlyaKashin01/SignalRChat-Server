@@ -24,6 +24,7 @@ namespace webapi
         private readonly IPersonalMessageService _personalMessageService;
         private readonly IGroupService _groupService;
         private readonly IGroupMessageService _groupMessageService;
+        private readonly IPersonService _personService;
         private static ConcurrentDictionary<int, string> pullConections = new ConcurrentDictionary<int, string>();
         public override Task OnConnectedAsync()
         {
@@ -49,18 +50,30 @@ namespace webapi
             pullConections.TryGetValue(userId, out string? connectionId);
             return connectionId;
         }
-        public ChatHub(IPersonalMessageService personalMessageService, IGroupMessageService groupMessageService, IGroupService groupService)
+        public ChatHub(IPersonalMessageService personalMessageService, IGroupMessageService groupMessageService, IGroupService groupService, IPersonService personService)
         {
             _personalMessageService = personalMessageService;
             _groupMessageService = groupMessageService;
             _groupService = groupService;
+            _personService = personService;
         }
-        public async Task SendPersonalMessage(PersonalMessageDto request)
+        public async Task GetAllUsers (int personId)
         {
-            request.SentAt = DateTime.UtcNow;
-            var messageId = await _personalMessageService.SavePersonalMessageAsync(request);
+            var users = await _personService.GetAllUsersAsync(personId);
+            if (users != null)
+                await this.Clients.Caller.SendAsync("AllUsers", users);
+            else
+                await this.Clients.Caller.SendAsync("Error", "users is not exist");
+        }
+        public async Task SendPersonalMessage(PersonalMessageDto message)
+        {
+            message.SentAt = DateTime.UtcNow;
+            var messageId = await _personalMessageService.SavePersonalMessageAsync(message);
             if (messageId != 0)
-                    await this.Clients.Clients(pullConections.FirstOrDefault(x => x.Key == request.SenderId).Value, pullConections.FirstOrDefault(x => x.Key == request.RecipientId).Value).SendAsync("NewMessage", request);
+                    await this.Clients.Clients(
+                        pullConections.FirstOrDefault(x => x.Key == message.SenderId).Value, 
+                        pullConections.FirstOrDefault(x => x.Key == message.RecipientId).Value)
+                                      .SendAsync("NewMessage", message);
             else await this.Clients.Caller.SendAsync("Error", "error save message to DB");
         }
 
@@ -148,7 +161,7 @@ namespace webapi
                 var groupedMessages = messages.GroupBy(x => x.SentAt.Date).Select(group => new
                 {
                     SentAt = group.Key,
-                    Messages = group.ToList()
+                    Messages = group.ToList() 
                 });
                 await this.Clients.Caller.SendAsync("AllGroupMessages", groupedMessages);
             }
@@ -158,8 +171,12 @@ namespace webapi
         public async Task GetAllMembersInGroup(int groupId)
         {
             var members = await _groupService.GetAllMembersInGroupAsync(groupId);
-            if (members != null)
-                await Clients.Caller.SendAsync("AllMembers", members);
+            var creatorLogin = await _groupService.GetCreatorLoginAsync(groupId);
+            if (members != null && creatorLogin != "")
+            {
+                var response = new MemberResponse { CreatorLogin = creatorLogin, GroupMembers = members.ToList() };
+                await Clients.Caller.SendAsync("AllMembers", response);
+            }
             else
                 await Clients.Caller.SendAsync("Error", "Нет участников");
         }

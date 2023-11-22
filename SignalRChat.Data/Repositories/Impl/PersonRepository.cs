@@ -16,5 +16,19 @@ namespace SignalRChat.Data.Repositories.Impl
         {
             return await _context.Users.FirstOrDefaultAsync(x => x.Login == login);
         }
+        public async Task<IEnumerable<Person>> GetAllUsersAsync(int personId)
+        {
+            var dialogs = await _context.PersonalMessages
+            .Where(m => m.SenderId == personId || m.RecipientId == personId)
+            .Select(m => m.SenderId)
+            .Union(_context.PersonalMessages.Where(m => m.SenderId == personId || m.RecipientId == personId)
+            .Select(m => m.RecipientId))
+            .Distinct()
+            .Where(id => id != personId)
+            .ToListAsync();
+            var usersInDialogs = await _context.Users.Where(u => dialogs.Contains(u.Id)).ToListAsync();
+            var users = await _context.Users.Where(x => x.Id != personId).ToListAsync();
+            return users.Except(usersInDialogs);
+        }
     }
 }

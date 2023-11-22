@@ -2,6 +2,7 @@
 using SignalRChat.Core.Dto.Auth;
 using SignalRChat.Core.Service.Interfaces;
 using SignalRChat.Data.Repositories.Interfaces;
+using SignalRChat.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,12 @@ namespace SignalRChat.Core.Service.Impl
         {
             var response = await _personRepository.FindByLoginAsync(login);
             return _mapper.Map<PersonResponse>(response);
+        }
+
+        public async Task<IEnumerable<PersonResponse>> GetAllUsersAsync(int personId)
+        {
+            var response = await _personRepository.GetAllUsersAsync(personId);
+            return _mapper.Map<IEnumerable<PersonResponse>>(response);
         }
     }
 }
