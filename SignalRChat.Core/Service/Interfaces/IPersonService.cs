@@ -12,5 +12,7 @@ namespace SignalRChat.Core.Service.Interfaces
     {
         Task<PersonResponse> FindPersonByLoginAcync(string login);
         Task<IEnumerable<PersonResponse>> GetAllUsersAsync(int personId);
+        Task <PersonResponse> GetPersonByIdAsync(int personId);
+        Task<IEnumerable<PersonResponse>> GetAllUsersToAddGroupAsync(int groupId, int personId);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using SignalRChat.Core.Dto;
 using SignalRChat.Core.Dto.Auth;
 using SignalRChat.Domain.Entities;
 using System;
@@ -18,6 +19,9 @@ namespace SignalRChat.Core.Mapping
 
             CreateMap<Person, AuthResponse>();
             CreateMap<Person, PersonResponse>();
+
+            CreateMap<PersonResponse, PersonalMessageDto>()
+                .ForMember(dest => dest.SenderLogin, opt => opt.MapFrom(src => src.Login));
         }
     }
 }

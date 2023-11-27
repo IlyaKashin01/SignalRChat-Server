@@ -65,9 +65,19 @@ namespace webapi
             else
                 await this.Clients.Caller.SendAsync("Error", "users is not exist");
         }
+        public async Task GetAllUsersToAddGroup(int groupId, int personId)
+        {
+            var users = await _personService.GetAllUsersToAddGroupAsync(groupId, personId);
+            if (users != null)
+                await this.Clients.Caller.SendAsync("AllUsersToAddGroup", users);
+            else
+                await this.Clients.Caller.SendAsync("Error", "users is not exist");
+        }
         public async Task SendPersonalMessage(PersonalMessageDto message)
         {
             message.SentAt = DateTime.UtcNow;
+            var person = await _personService.GetPersonByIdAsync(message.SenderId);
+            if (person != null) message.SenderLogin = person.Login;
             var messageId = await _personalMessageService.SavePersonalMessageAsync(message);
             if (messageId != 0)
                     await this.Clients.Clients(
@@ -79,7 +89,7 @@ namespace webapi
 
         public async Task GetAllPersonalMessages(GetPersonalMessagesRequest request)
         {
-                var messages = await _personalMessageService.GetAllMessageInDialogAsync(request.SenderId, request.RecipientId);
+            var messages = await _personalMessageService.GetAllMessageInDialogAsync(request.SenderId, request.RecipientId);
             if (messages != null)
             {
                 var groupedMessages = messages.GroupBy(x => x.SentAt.Date).Select(group => new
@@ -123,7 +133,7 @@ namespace webapi
         {
             var groupId = await _groupService.CreateGroupAsync(request);
             if (groupId != 0)
-                await this.Clients.Caller.SendAsync("newGroup", groupId); 
+                await this.Clients.Caller.SendAsync("NewGroup", groupId); 
             else
                 await this.Clients.Caller.SendAsync("Error", "error added group");
         }

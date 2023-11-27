@@ -26,9 +26,15 @@ namespace SignalRChat.Data.Repositories.Impl
             .Distinct()
             .Where(id => id != personId)
             .ToListAsync();
-            var usersInDialogs = await _context.Users.Where(u => dialogs.Contains(u.Id)).ToListAsync();
             var users = await _context.Users.Where(x => x.Id != personId).ToListAsync();
-            return users.Except(usersInDialogs);
+            return users.Except(await _context.Users.Where(u => dialogs.Contains(u.Id)).ToListAsync());
+        }
+
+        public async Task<IEnumerable<Person>> GetAllUsersToAddGroupAsync(int groupId, int personId)
+        {
+            var members = await _context.GroupMembers.Where(x => x.GroupId == groupId).Select(m => m.PersonId).ToListAsync();
+            var users = await _context.Users.Where(x => x.Id != personId).ToListAsync();
+            return users.Except(await _context.Users.Where(x => members.Contains(x.Id)).ToListAsync());
         }
     }
 }

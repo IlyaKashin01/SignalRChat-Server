@@ -11,5 +11,6 @@ namespace SignalRChat.Data.Repositories.Interfaces
     {
         Task<Person?> FindByLoginAsync(string login);
         Task<IEnumerable<Person>> GetAllUsersAsync(int personId);
+        Task<IEnumerable<Person>> GetAllUsersToAddGroupAsync(int groupId, int personId);
     }
 }

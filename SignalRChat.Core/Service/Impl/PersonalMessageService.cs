@@ -16,11 +16,13 @@ namespace SignalRChat.Core.Service.Impl
     {
         private readonly IMapper _mapper;
         private readonly IPersonalMessageRepository _personalMessageRepository;
+        private readonly IPersonRepository _personRepository;
 
-        public PersonalMessageService(IPersonalMessageRepository personalMessageRepository, IMapper mapper)
+        public PersonalMessageService(IPersonalMessageRepository personalMessageRepository, IMapper mapper, IPersonRepository personRepository)
         {
             _personalMessageRepository = personalMessageRepository;
             _mapper = mapper;
+            _personRepository = personRepository;
         }
 
         public async Task<IEnumerable<PersonResponse>> GetAllDialogsAsync(int personId)
@@ -32,7 +34,15 @@ namespace SignalRChat.Core.Service.Impl
         public async Task<IEnumerable<PersonalMessageDto>> GetAllMessageInDialogAsync(int myId, int personId)
         {
             var messages = await _personalMessageRepository.GetAllMessagesInDialogAsync(myId, personId);
-            return _mapper.Map<IEnumerable<PersonalMessageDto>>(messages);
+            var response = _mapper.Map<IEnumerable<PersonalMessageDto>>(messages);
+
+            foreach (var message in response)
+            {
+                var person = await _personRepository.GetByIdAsync(message.SenderId);
+                if (person != null) message.SenderLogin = person.Login;
+            }
+
+            return response;
         }
 
         public async Task<int> SavePersonalMessageAsync(PersonalMessageDto request)

@@ -33,5 +33,17 @@ namespace SignalRChat.Core.Service.Impl
             var response = await _personRepository.GetAllUsersAsync(personId);
             return _mapper.Map<IEnumerable<PersonResponse>>(response);
         }
+
+        public async Task<IEnumerable<PersonResponse>> GetAllUsersToAddGroupAsync(int groupId, int personId)
+        {
+            var response = await _personRepository.GetAllUsersToAddGroupAsync(groupId, personId);
+            return _mapper.Map<IEnumerable<PersonResponse>>(response);
+        }
+
+        public async Task<PersonResponse> GetPersonByIdAsync(int personId)
+        {
+            var person = await _personRepository.GetByIdAsync(personId);
+            return _mapper.Map<PersonResponse>(person);
+        }
     }
 }
