@@ -14,11 +14,13 @@ namespace SignalRChat.Core.Service.Impl
     public class GroupMessageService : IGroupMessageService
     {
         private readonly IGroupMessageRepository _groupMessageRepository;
+        private readonly IGroupRepository _groupRepository;
         private readonly IMapper _mapper;
-        public GroupMessageService(IGroupMessageRepository groupMessageRepository, IMapper mapper)
+        public GroupMessageService(IGroupMessageRepository groupMessageRepository, IMapper mapper, IGroupRepository groupRepository)
         {
             _groupMessageRepository = groupMessageRepository;
             _mapper = mapper;
+            _groupRepository = groupRepository;
         }
         public async Task<IEnumerable<GroupMessageDto>> GetAllGroupMessagesAsync(int groupId)
         {
@@ -29,6 +31,8 @@ namespace SignalRChat.Core.Service.Impl
         public async Task<int> SaveGroupMessageAsync(GroupMessageDto request)
         {
             var group = _mapper.Map<GroupMessage>(request);
+            var existingGroup = await _groupRepository.GetByIdAsync(request.GroupId);
+            if(existingGroup != null) group.Group = existingGroup; 
             return await _groupMessageRepository.CreateAsync(group);
         }
     }

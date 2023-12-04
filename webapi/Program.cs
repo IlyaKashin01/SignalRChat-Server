@@ -14,6 +14,7 @@ using SignalRChat.Data;
 using System.Reflection;
 using System.Text.Json;
 using webapi;
+using webapi.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -92,7 +93,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
                 // если запрос направлен хабу
                 var path = context.HttpContext.Request.Path;
-                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chat"))
+                if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/chat") || path.StartsWithSegments("/group")))
                 {
                     // получаем токен из строки запроса
                     context.Token = accessToken;
@@ -128,9 +129,8 @@ options
 
 app.UseHttpsRedirection();
 
-//app.UseAuthorization();
-
 app.MapHub<ChatHub>("/chat");
+app.MapHub<GroupHub>("/group");
 app.MapControllers();
 
 app.Run();

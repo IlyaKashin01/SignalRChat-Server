@@ -27,5 +27,13 @@ namespace SignalRChat.Data.Repositories.Impl
                 return id;
             return 0;
         }
+        public async Task<GroupMessage?> GetLastGroupMessageAsync(int groupId)
+        {
+            return await _context.GroupMessages
+                                 .Where(x => (x.GroupId == groupId))
+                                 .OrderBy(x => x.SentAt)
+                                 .LastOrDefaultAsync();
+
+        }
     }
 }

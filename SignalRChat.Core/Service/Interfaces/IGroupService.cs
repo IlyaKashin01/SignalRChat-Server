@@ -11,7 +11,7 @@ namespace SignalRChat.Core.Service.Interfaces
     public interface IGroupService
     {
         Task<int> CreateGroupAsync(GroupRequest request);
-        Task<IEnumerable<GroupResponse>> GetAllGroupsAsync(int personId);
+        Task<IEnumerable<Dialog>> GetAllGroupsAsync(int personId);
         Task<int> AddPersonToGroupAsync(MemberRequest request);
         Task<GroupResponse> GetGroupByIdAsync(int groupId);
         Task<string> GetCreatorLoginAsync(int groupId);

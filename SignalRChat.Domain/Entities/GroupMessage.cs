@@ -8,6 +8,7 @@ namespace SignalRChat.Domain.Entities
 {
     public class GroupMessage: BaseEntity
     {
+        public GroupChatRoom Group { get; set; } = new GroupChatRoom();
         public int GroupId { get; set; }
         public int SenderId { get; set; }
         public string Content { get; set; } = string.Empty;

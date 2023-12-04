@@ -4,6 +4,8 @@ using SignalRChat.Core.Dto.Auth;
 using SignalRChat.Core.DTO;
 using SignalRChat.Core.Service.Impl;
 using SignalRChat.Core.Service.Interfaces;
+using SignalRChat.Data.Repositories.Interfaces;
+using SignalRChat.Domain.Entities;
 using System.Text.RegularExpressions;
 
 namespace webapi
@@ -13,11 +15,19 @@ namespace webapi
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        private readonly IPersonService _groupService;
-        public AuthController(IAuthService authService, IPersonService groupService)
+        private readonly IPersonService _personService;
+        private readonly IGroupMessageService _groupMessageService;
+        private readonly IPersonalMessageService _personalMessageService;
+        private readonly IPersonalMessageRepository _personalMessageRepository;
+        private readonly IGroupService _groupService;
+        public AuthController(IAuthService authService, IGroupService groupService, IPersonalMessageService personalMessageService, IPersonalMessageRepository personalMessageRepository, IPersonService personService, IGroupMessageService groupMessageService)
         {
             _authService = authService;
             _groupService = groupService;
+            _personalMessageService = personalMessageService;
+            _personalMessageRepository = personalMessageRepository;
+            _personService = personService;
+            _groupMessageService = groupMessageService;
         }
 
         [HttpPost("signin")]
@@ -38,13 +48,14 @@ namespace webapi
 
 
         [HttpGet("test")]
-        public async Task<ActionResult<IEnumerable<PersonResponse>>> Test(int id) 
+        public async Task<ActionResult<IEnumerable<GroupMessageDto>>> Test(int id) 
         {
-            var members = await _groupService.GetAllUsersAsync(id);
-            if (members != null)
+            var dialogs = await _groupMessageService.GetAllGroupMessagesAsync(id);
+
+            if (dialogs != null)
             {
                
-                return Ok(members);
+                return Ok(dialogs);
             }
             return BadRequest();
         }

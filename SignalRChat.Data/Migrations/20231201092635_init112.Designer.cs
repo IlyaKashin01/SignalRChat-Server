@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SignalRChat.Data;
@@ -11,9 +12,11 @@ using SignalRChat.Data;
 namespace SignalRChat.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231201092635_init112")]
+    partial class init112
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -238,6 +241,9 @@ namespace SignalRChat.Data.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_check");
 
+                    b.Property<int?>("PersonId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("RecipientId")
                         .HasColumnType("integer")
                         .HasColumnName("recipient_id");
@@ -258,7 +264,7 @@ namespace SignalRChat.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RecipientId");
+                    b.HasIndex("PersonId");
 
                     b.ToTable("personal_message", (string)null);
                 });
@@ -306,13 +312,9 @@ namespace SignalRChat.Data.Migrations
 
             modelBuilder.Entity("SignalRChat.Domain.Entities.PersonalMessage", b =>
                 {
-                    b.HasOne("SignalRChat.Domain.Entities.Person", "Recipient")
+                    b.HasOne("SignalRChat.Domain.Entities.Person", null)
                         .WithMany("PersonalMessages")
-                        .HasForeignKey("RecipientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Recipient");
+                        .HasForeignKey("PersonId");
                 });
 
             modelBuilder.Entity("SignalRChat.Domain.Entities.GroupChatRoom", b =>

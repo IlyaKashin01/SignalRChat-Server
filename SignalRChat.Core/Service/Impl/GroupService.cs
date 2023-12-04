@@ -3,6 +3,7 @@ using SignalRChat.Core.Dto;
 using SignalRChat.Core.Dto.Auth;
 using SignalRChat.Core.DTO;
 using SignalRChat.Core.Service.Interfaces;
+using SignalRChat.Data.Repositories.Impl;
 using SignalRChat.Data.Repositories.Interfaces;
 using SignalRChat.Domain.Entities;
 using System;
@@ -47,10 +48,22 @@ namespace SignalRChat.Core.Service.Impl
             return await _groupRepository.CreateAsync(group);
         }
 
-        public async Task<IEnumerable<GroupResponse>> GetAllGroupsAsync(int personId)
+        public async Task<IEnumerable<Dialog>> GetAllGroupsAsync(int personId)
         {
             var groups = await _groupRepository.GetAllGroupAsync(personId);
-            return _mapper.Map<IEnumerable<GroupResponse>>(groups);
+            var response = _mapper.Map<IEnumerable<Dialog>>(groups);
+            foreach (var group in response)
+            {
+                var lastMessage = await _groupRepository.GetLastGroupMessageAsync(group.Id);
+                if (lastMessage != null)
+                {
+                    group.LastMessage = lastMessage.Content;
+                    group.DateTime = lastMessage.SentAt;
+                    group.IsCheck = lastMessage.IsCheck;
+                }  
+                group.IsGroup = true;  
+            }
+            return response;
         }
 
         public async Task<GroupResponse> GetGroupByIdAsync(int groupId)
