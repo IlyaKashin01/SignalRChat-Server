@@ -1,7 +1,8 @@
-﻿using AutoMapper;
-using SignalRChat.Core.Dto;
+﻿using Mapster;
+using AutoMapper;
 using SignalRChat.Core.Dto.Auth;
 using SignalRChat.Core.DTO;
+using SignalRChat.Core.DTO.Messages;
 using SignalRChat.Core.Service.Interfaces;
 using SignalRChat.Data.Repositories.Interfaces;
 using SignalRChat.Domain.Entities;
@@ -29,25 +30,23 @@ namespace SignalRChat.Core.Service.Impl
         public async Task<IEnumerable<Dialog>> GetAllDialogsAsync(int personId)
         {
             var persons = await _personalMessageRepository.GetAllPersonalDialogsAsync(personId);
+            
             var response = _mapper.Map<IEnumerable<Dialog>>(persons);
             foreach (var dialog in response)
             {
                 var lastMessage = await _personalMessageRepository.GetLastPersonalMessageAsync(dialog.Id, personId); 
                 if (lastMessage != null)
                 {
-                    dialog.LastMessage = lastMessage.Content;
-                    dialog.DateTime = lastMessage.SentAt;
-                    dialog.IsCheck = lastMessage.IsCheck;
-                    dialog.IsGroup = false;
+                    _mapper.Map(lastMessage, dialog);
                 }    
             }
             return response;
         }
 
-        public async Task<IEnumerable<PersonalMessageDto>> GetAllMessageInDialogAsync(int myId, int personId)
+        public async Task<IEnumerable<PersonalMessageResponse>> GetAllMessageInDialogAsync(int myId, int personId)
         {
             var messages = await _personalMessageRepository.GetAllMessagesInDialogAsync(myId, personId);
-            var response = _mapper.Map<IEnumerable<PersonalMessageDto>>(messages);
+            var response = _mapper.Map<IEnumerable<PersonalMessageResponse>>(messages);
 
             foreach (var message in response)
             {
@@ -58,31 +57,31 @@ namespace SignalRChat.Core.Service.Impl
             return response;
         }
 
-        public Task<PersonalMessageDto> GetLastPersonalMessageByIdAsync(int senderId, int recipientId)
+        public Task<PersonalMessageResponse> GetLastPersonalMessageByIdAsync(int senderId, int recipientId)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<int> SavePersonalMessageAsync(PersonalMessageDto request)
+        public async Task<PersonalMessageResponse> SavePersonalMessageAsync(PersonalMessageRequest request)
         {
             var message = _mapper.Map<PersonalMessage>(request);
-            
             var recipient = await _personRepository.GetByIdAsync(request.RecipientId); 
             if (recipient != null)
                 message.Recipient = recipient;
 
-            return await _personalMessageRepository.CreateAsync(message);
+            await _personalMessageRepository.CreateAsync(message);
+            return _mapper.Map<PersonalMessageResponse>(message);
         }
 
-        public Task<bool> UpdatePersonalMessageAsync(PersonalMessageDto request)
+        public Task<bool> UpdatePersonalMessageAsync(PersonalMessageResponse request)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<PersonalMessageDto>> ChangeStatusIncomingMessagesAsync(int senderId, int recipientId)
+        public async Task<IEnumerable<PersonalMessageResponse>> ChangeStatusIncomingMessagesAsync(int senderId, int recipientId)
         {
             var messages = await _personalMessageRepository.ChangeStatusIncomingMessagesAsync(senderId, recipientId);
-            var response = _mapper.Map<IEnumerable<PersonalMessageDto>>(messages);
+            var response = _mapper.Map<IEnumerable<PersonalMessageResponse>>(messages);
             foreach (var message in response)
             {
                 var person = await _personRepository.GetByIdAsync(message.SenderId);

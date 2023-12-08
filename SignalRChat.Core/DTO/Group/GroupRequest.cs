@@ -1,4 +1,4 @@
-namespace SignalRChat.Core.Dto
+namespace SignalRChat.Core.DTO.Group
 {
     public class GroupRequest
     {

@@ -14,6 +14,7 @@ namespace SignalRChat.Data.Repositories.Impl
         public PersonalMessageRepository(AppDbContext context) : base(context)
         {
         }
+
         public async Task<IEnumerable<PersonalMessage>> GetAllMessagesInDialogAsync(int myId, int personId)
         {
             return await _context.PersonalMessages.Where(x => (x.SenderId == myId && x.RecipientId == personId) ||

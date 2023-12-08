@@ -1,4 +1,4 @@
-﻿namespace SignalRChat.Core.DTO
+﻿namespace SignalRChat.Core.DTO.Members
 {
     public class MemberRequest
     {

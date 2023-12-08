@@ -1,5 +1,6 @@
-﻿using SignalRChat.Core.Dto;
-using SignalRChat.Core.DTO;
+﻿using SignalRChat.Core.DTO;
+using SignalRChat.Core.DTO.Group;
+using SignalRChat.Core.DTO.Members;
 using System;
 using System.Collections.Generic;
 using System.Linq;

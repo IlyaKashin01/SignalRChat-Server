@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SignalRChat.Core.DTO
+namespace SignalRChat.Core.DTO.Group
 {
     public class GroupResponse
     {

@@ -3,8 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.SignalR;
-using SignalRChat.Core.Dto;
-using SignalRChat.Core.DTO;
+using SignalRChat.Core.DTO.Messages;
 using SignalRChat.Core.Service.Interfaces;
 using SignalRChat.Domain.Entities;
 using System;
@@ -40,7 +39,7 @@ namespace webapi.Hubs
 
             return base.OnConnectedAsync();
         }
-
+      
         public override Task OnDisconnectedAsync(Exception? exception)
         {
             int userId = int.Parse(Context!.User!.Claims.First(c => c.Type == ClaimTypes.Sid).Value);
@@ -56,6 +55,10 @@ namespace webapi.Hubs
             return connectionId;
         }
 
+        public async Task GetOnlineMarkers()
+        {
+            await Clients.All.SendAsync("OnlineMarkers", pullConections.Keys.ToList());
+        }
         public async Task GetAllUsers(int personId)
         {
             var users = await _personService.GetAllUsersAsync(personId);
@@ -65,20 +68,19 @@ namespace webapi.Hubs
                 await Clients.Caller.SendAsync("Error", "нет новых пользователей, с которыми можно начать диалог");
         }
 
-        public async Task SendPersonalMessage(PersonalMessageDto message)
+        public async Task SendPersonalMessage(PersonalMessageRequest message)
         {
-            message.SentAt = DateTime.UtcNow;
             var person = await _personService.GetPersonByIdAsync(message.SenderId);
 
             if (person != null) message.SenderLogin = person.Login;
-            var messageId = await _personalMessageService.SavePersonalMessageAsync(message);
-            if (messageId != 0)
+            var createdMessage = await _personalMessageService.SavePersonalMessageAsync(message);
+            if (createdMessage != null)
             {
                 if(message.IsNewDialog) await GetAllDialogs(message.RecipientId);
                 await Clients.Clients(
                     pullConections.FirstOrDefault(x => x.Key == message.SenderId).Value,
                     pullConections.FirstOrDefault(x => x.Key == message.RecipientId).Value)
-                                  .SendAsync("NewMessage", message);
+                                  .SendAsync("NewMessage", createdMessage);
             }
             else await Clients.Caller.SendAsync("Error", "ошибка сохранения сообщения в БД");
         }
@@ -100,22 +102,16 @@ namespace webapi.Hubs
         }
         public async Task GetAllDialogs(int personId)
         {
-            var conectionId = pullConections.FirstOrDefault(x => x.Key == personId).Value;
-            if (conectionId != null)
-            {
-                var personalDialogs = await _personalMessageService.GetAllDialogsAsync(personId);
+            var personalDialogs = await _personalMessageService.GetAllDialogsAsync(personId);
 
-                var groups = await _groupService.GetAllGroupsAsync(personId);
+            var groups = await _groupService.GetAllGroupsAsync(personId);
 
-                await _groupHubContext.Clients.Client(conectionId).SendAsync("OnConnectedGroupsAsync", groups, personId);
+            var dialogs = personalDialogs.Union(groups).OrderBy(x => x.Name);
 
-                var dialogs = personalDialogs.Union(groups);
-
-                if (dialogs != null)
-                    await Clients.Client(conectionId).SendAsync("AllDialogs", dialogs);
-            }
+            if (dialogs != null)
+                await Clients.Caller.SendAsync("AllDialogs", dialogs);
             else
-                await Clients.Caller.SendAsync("Error", "попытка получения списка диалогов без подключения к хабу");
+                await Clients.Caller.SendAsync("Error", "нет диалогов");
         }
 
         public async Task ChangeStatusIncomingMessagesAsync(int senderId, int recipientId)

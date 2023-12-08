@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using SignalRChat.Core.Dto;
 using SignalRChat.Core.DTO;
+using SignalRChat.Core.DTO.Group;
+using SignalRChat.Core.DTO.Members;
+using SignalRChat.Core.DTO.Messages;
 using SignalRChat.Core.Service.Interfaces;
 using System.Collections.Concurrent;
 using System.Security.Claims;
@@ -80,7 +82,7 @@ namespace webapi.Hubs
                 {
                     var conectionId = pullConections.FirstOrDefault(x => x.Key == request.PersonId).Value;
                     await Groups.AddToGroupAsync(conectionId, group.Name);
-                    await _chatHubContext.Clients.Client(conectionId).SendAsync("GetAllDialogs", request.PersonId);
+                    //await _chatHubContext.Clients.Client(conectionId).SendAsync("GetAllDialogs", request.PersonId);
                     await Clients.Caller.SendAsync("PersonAdded", memberId);
                 }
             }
@@ -88,7 +90,7 @@ namespace webapi.Hubs
                 await Clients.Caller.SendAsync("Error", "попытка добавить пользователя в несуществующую группу");
         }
 
-        public async Task SaveGroupMessage(GroupMessageDto message)
+        public async Task SaveGroupMessage(GroupMessageResponse message)
         {
             message.SentAt = DateTime.UtcNow;
             var messageId = await _groupMessageService.SaveGroupMessageAsync(message);
@@ -125,8 +127,9 @@ namespace webapi.Hubs
             else
                 await Clients.Caller.SendAsync("Error", "нет участников в группе");
         }
-        public async Task OnConnectedGroupsAsync(IEnumerable<Dialog> groups, int personId)
+        public async Task OnConnectedGroupsAsync(int personId)
         {
+            var groups = await _groupService.GetAllGroupsAsync(personId);
             var connectionId = GetConnectionId(personId);
             if (connectionId != null)
                 foreach (var group in groups)

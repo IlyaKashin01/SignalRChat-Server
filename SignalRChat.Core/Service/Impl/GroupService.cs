@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
-using SignalRChat.Core.Dto;
 using SignalRChat.Core.Dto.Auth;
 using SignalRChat.Core.DTO;
+using SignalRChat.Core.DTO.Group;
+using SignalRChat.Core.DTO.Members;
 using SignalRChat.Core.Service.Interfaces;
 using SignalRChat.Data.Repositories.Impl;
 using SignalRChat.Data.Repositories.Interfaces;
@@ -57,11 +58,8 @@ namespace SignalRChat.Core.Service.Impl
                 var lastMessage = await _groupRepository.GetLastGroupMessageAsync(group.Id);
                 if (lastMessage != null)
                 {
-                    group.LastMessage = lastMessage.Content;
-                    group.DateTime = lastMessage.SentAt;
-                    group.IsCheck = lastMessage.IsCheck;
+                    _mapper.Map(lastMessage, group);
                 }  
-                group.IsGroup = true;  
             }
             return response;
         }

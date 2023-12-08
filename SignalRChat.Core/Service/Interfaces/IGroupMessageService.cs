@@ -1,4 +1,4 @@
-﻿using SignalRChat.Core.DTO;
+﻿using SignalRChat.Core.DTO.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ namespace SignalRChat.Core.Service.Interfaces
 {
     public interface IGroupMessageService
     {
-        Task<int> SaveGroupMessageAsync(GroupMessageDto request);
-        Task<IEnumerable<GroupMessageDto>> GetAllGroupMessagesAsync(int groupId);
+        Task<int> SaveGroupMessageAsync(GroupMessageResponse request);
+        Task<IEnumerable<GroupMessageResponse>> GetAllGroupMessagesAsync(int groupId);
     }
 }

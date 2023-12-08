@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using SignalRChat.Core.DTO;
+using SignalRChat.Core.DTO.Messages;
 using SignalRChat.Core.Service.Interfaces;
 using SignalRChat.Data.Repositories.Interfaces;
 using SignalRChat.Domain.Entities;
@@ -22,18 +22,19 @@ namespace SignalRChat.Core.Service.Impl
             _mapper = mapper;
             _groupRepository = groupRepository;
         }
-        public async Task<IEnumerable<GroupMessageDto>> GetAllGroupMessagesAsync(int groupId)
+        public async Task<IEnumerable<GroupMessageResponse>> GetAllGroupMessagesAsync(int groupId)
         {
             var messages = await _groupMessageRepository.GetAllMessageInGroupAsync(groupId);
-            return _mapper.Map<IEnumerable<GroupMessageDto>>(messages);
+            return _mapper.Map<IEnumerable<GroupMessageResponse>>(messages);
         }
 
-        public async Task<int> SaveGroupMessageAsync(GroupMessageDto request)
+        public async Task<int> SaveGroupMessageAsync(GroupMessageResponse request)
         {
-            var group = _mapper.Map<GroupMessage>(request);
+            var groupMessage = _mapper.Map<GroupMessage>(request);
+            
             var existingGroup = await _groupRepository.GetByIdAsync(request.GroupId);
-            if(existingGroup != null) group.Group = existingGroup; 
-            return await _groupMessageRepository.CreateAsync(group);
+            if(existingGroup != null) groupMessage.Group = existingGroup; 
+            return await _groupMessageRepository.CreateAsync(groupMessage);
         }
     }
 }
