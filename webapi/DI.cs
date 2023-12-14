@@ -1,5 +1,4 @@
-﻿using MapsterMapper;
-using SignalRChat.Core.Service.Impl;
+﻿using SignalRChat.Core.Service.Impl;
 using SignalRChat.Core.Service.Interfaces;
 using SignalRChat.Data.Repositories.Impl;
 using SignalRChat.Data.Repositories.Interfaces;

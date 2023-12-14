@@ -1,5 +1,4 @@
-﻿using Mapster;
-using AutoMapper;
+﻿using AutoMapper;
 using SignalRChat.Core.Dto.Auth;
 using SignalRChat.Core.DTO;
 using SignalRChat.Core.DTO.Messages;
@@ -70,7 +69,11 @@ namespace SignalRChat.Core.Service.Impl
                 message.Recipient = recipient;
 
             await _personalMessageRepository.CreateAsync(message);
-            return _mapper.Map<PersonalMessageResponse>(message);
+            var response = _mapper.Map<PersonalMessageResponse>(message);
+            var person = await _personRepository.GetByIdAsync(request.SenderId);
+            if (person != null)
+                response.SenderLogin = person.Login;
+            return response;
         }
 
         public Task<bool> UpdatePersonalMessageAsync(PersonalMessageResponse request)

@@ -7,6 +7,7 @@ using SignalRChat.Core.DTO.Messages;
 using SignalRChat.Core.Service.Interfaces;
 using System.Collections.Concurrent;
 using System.Security.Claims;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace webapi.Hubs
 {
@@ -80,23 +81,33 @@ namespace webapi.Hubs
                 var memberId = await _groupService.AddPersonToGroupAsync(request);
                 if (memberId != 0)
                 {
-                    var conectionId = pullConections.FirstOrDefault(x => x.Key == request.PersonId).Value;
-                    await Groups.AddToGroupAsync(conectionId, group.Name);
-                    //await _chatHubContext.Clients.Client(conectionId).SendAsync("GetAllDialogs", request.PersonId);
-                    await Clients.Caller.SendAsync("PersonAdded", memberId);
+                    var connectionId = GetConnectionId(request.PersonId);
+                    if (connectionId != null)
+                    {
+                        await Groups.AddToGroupAsync(connectionId, group.Name);
+                        await Clients.Client(connectionId).SendAsync("Notification", group.Name, "Вас добавили в группу");
+                    }
+                    await this.Clients.Caller.SendAsync("PersonAdded", memberId);
+                    var addedPerson = await _personService.GetPersonByIdAsync(request.AddedByPerson);
+                    var person = await _personService.GetPersonByIdAsync(request.PersonId);
+                    if (addedPerson != null && person != null)
+                    {
+                        await _groupMessageService.SaveGroupMessageAsync(new GroupMessageRequest { Content = $"{addedPerson.Login} добавил пользователя {person.Login} в группу", GroupId = group.Id, SenderId = 0 });
+                        await Clients.Group(group.Name).SendAsync("NewGroupMessage", $"{addedPerson.Login} добавил пользователя {person.Login} в группу");
+                    }
                 }
             }
             else
-                await Clients.Caller.SendAsync("Error", "попытка добавить пользователя в несуществующую группу");
+                await this.Clients.Caller.SendAsync("Error", "Не удалось добавить пользователя в группу");
         }
 
-        public async Task SaveGroupMessage(GroupMessageResponse message)
+        public async Task SaveGroupMessage(GroupMessageRequest message)
         {
-            message.SentAt = DateTime.UtcNow;
-            var messageId = await _groupMessageService.SaveGroupMessageAsync(message);
+            var savedMessage = await _groupMessageService.SaveGroupMessageAsync(message);
             var group = await _groupService.GetGroupByIdAsync(message.GroupId);
-            if (messageId != 0 && group != null)
-                await Clients.Group(group.Name).SendAsync("NewGroupMessage", message);
+
+            if (savedMessage != null && group != null)
+                await Clients.Group(group.Name).SendAsync("NewGroupMessage", savedMessage);
             else
                 await Clients.Caller.SendAsync("Error", "ошибка сохранения группового сообщения в БД");
         }

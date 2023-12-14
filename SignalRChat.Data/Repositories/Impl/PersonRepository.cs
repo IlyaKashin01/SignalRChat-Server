@@ -32,9 +32,14 @@ namespace SignalRChat.Data.Repositories.Impl
 
         public async Task<IEnumerable<Person>> GetAllUsersToAddGroupAsync(int groupId, int personId)
         {
-            var members = await _context.GroupMembers.Where(x => x.GroupId == groupId).Select(m => m.PersonId).ToListAsync();
-            var users = await _context.Users.Where(x => x.Id != personId).ToListAsync();
-            return users.Except(await _context.Users.Where(x => members.Contains(x.Id)).ToListAsync());
+            var group = await _context.Groups.FirstOrDefaultAsync(x => x.Id == groupId);
+            if (group != null)
+            {
+                var members = await _context.GroupMembers.Where(x => x.GroupId == groupId).Select(m => m.PersonId).ToListAsync();
+                var users = await _context.Users.Where(x => x.Id != personId).ToListAsync();
+                return users.Except(await _context.Users.Where(x => members.Contains(x.Id) || x.Id == group.PersonId).ToListAsync());
+            }
+            return await _context.Users.Where(x => x.Id != personId).ToListAsync();
         }
     }
 }

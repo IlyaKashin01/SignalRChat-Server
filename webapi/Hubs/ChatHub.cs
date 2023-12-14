@@ -70,17 +70,21 @@ namespace webapi.Hubs
 
         public async Task SendPersonalMessage(PersonalMessageRequest message)
         {
-            var person = await _personService.GetPersonByIdAsync(message.SenderId);
-
-            if (person != null) message.SenderLogin = person.Login;
             var createdMessage = await _personalMessageService.SavePersonalMessageAsync(message);
             if (createdMessage != null)
             {
+                var recipientConnection = pullConections.FirstOrDefault(x => x.Key == message.RecipientId).Value;
                 if(message.IsNewDialog) await GetAllDialogs(message.RecipientId);
-                await Clients.Clients(
-                    pullConections.FirstOrDefault(x => x.Key == message.SenderId).Value,
-                    pullConections.FirstOrDefault(x => x.Key == message.RecipientId).Value)
-                                  .SendAsync("NewMessage", createdMessage);
+                if (recipientConnection != null)
+                {
+                    await Clients.Clients(
+                        pullConections.FirstOrDefault(x => x.Key == message.SenderId).Value,
+                        recipientConnection)
+                                      .SendAsync("NewMessage", createdMessage);
+                    await Clients.Client(recipientConnection).SendAsync("Notification", createdMessage.SenderLogin, createdMessage.Content);
+                }
+                else 
+                    await Clients.Caller.SendAsync("NewMessage", createdMessage);
             }
             else await Clients.Caller.SendAsync("Error", "ошибка сохранения сообщения в БД");
         }

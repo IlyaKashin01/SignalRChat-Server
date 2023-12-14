@@ -28,13 +28,14 @@ namespace SignalRChat.Core.Service.Impl
             return _mapper.Map<IEnumerable<GroupMessageResponse>>(messages);
         }
 
-        public async Task<int> SaveGroupMessageAsync(GroupMessageResponse request)
+        public async Task<GroupMessageResponse> SaveGroupMessageAsync(GroupMessageRequest request)
         {
             var groupMessage = _mapper.Map<GroupMessage>(request);
             
             var existingGroup = await _groupRepository.GetByIdAsync(request.GroupId);
             if(existingGroup != null) groupMessage.Group = existingGroup; 
-            return await _groupMessageRepository.CreateAsync(groupMessage);
+            await _groupMessageRepository.CreateAsync(groupMessage);
+            return _mapper.Map<GroupMessageResponse>(groupMessage);
         }
     }
 }

@@ -9,7 +9,7 @@ namespace SignalRChat.Core.Service.Interfaces
 {
     public interface IGroupMessageService
     {
-        Task<int> SaveGroupMessageAsync(GroupMessageResponse request);
+        Task<GroupMessageResponse> SaveGroupMessageAsync(GroupMessageRequest request);
         Task<IEnumerable<GroupMessageResponse>> GetAllGroupMessagesAsync(int groupId);
     }
 }

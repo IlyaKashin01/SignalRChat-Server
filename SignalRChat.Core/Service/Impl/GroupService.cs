@@ -36,7 +36,6 @@ namespace SignalRChat.Core.Service.Impl
             var person = await _personRepository.GetByIdAsync(request.PersonId);
             if (person != null) { 
                 member.Person = person; 
-                member.AddedDate = DateTime.UtcNow; 
             }
             return await _memberRepository.CreateAsync(member);
         }
