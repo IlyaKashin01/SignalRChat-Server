@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using SignalRChat.Core.DTO.Messages;
 using SignalRChat.Core.Service.Interfaces;
+using SignalRChat.Data.Repositories.Impl;
 using SignalRChat.Data.Repositories.Interfaces;
 using SignalRChat.Domain.Entities;
 using System;
@@ -15,17 +16,25 @@ namespace SignalRChat.Core.Service.Impl
     {
         private readonly IGroupMessageRepository _groupMessageRepository;
         private readonly IGroupRepository _groupRepository;
+        private readonly IPersonRepository _personRepository;
         private readonly IMapper _mapper;
-        public GroupMessageService(IGroupMessageRepository groupMessageRepository, IMapper mapper, IGroupRepository groupRepository)
+        public GroupMessageService(IGroupMessageRepository groupMessageRepository, IMapper mapper, IGroupRepository groupRepository, IPersonRepository personRepository)
         {
             _groupMessageRepository = groupMessageRepository;
             _mapper = mapper;
             _groupRepository = groupRepository;
+            _personRepository = personRepository;
         }
-        public async Task<IEnumerable<GroupMessageResponse>> GetAllGroupMessagesAsync(int groupId)
+        public async Task<IEnumerable<GroupMessageResponse>> GetAllGroupMessagesAsync(int groupId, int? personId)
         {
-            var messages = await _groupMessageRepository.GetAllMessageInGroupAsync(groupId);
-            return _mapper.Map<IEnumerable<GroupMessageResponse>>(messages);
+            var messages = await _groupMessageRepository.GetAllMessageInGroupAsync(groupId, personId);
+            var response = _mapper.Map<IEnumerable<GroupMessageResponse>>(messages);
+            foreach (var message in response)
+            {
+                var person = await _personRepository.GetByIdAsync(message.SenderId);
+                if (person != null) message.SenderLogin = person.Login;
+            }
+            return response;
         }
 
         public async Task<GroupMessageResponse> SaveGroupMessageAsync(GroupMessageRequest request)
@@ -35,7 +44,21 @@ namespace SignalRChat.Core.Service.Impl
             var existingGroup = await _groupRepository.GetByIdAsync(request.GroupId);
             if(existingGroup != null) groupMessage.Group = existingGroup; 
             await _groupMessageRepository.CreateAsync(groupMessage);
-            return _mapper.Map<GroupMessageResponse>(groupMessage);
+            var message = _mapper.Map<GroupMessageResponse>(groupMessage);
+            var person = await _personRepository.GetByIdAsync(message.SenderId);
+            if (person != null) message.SenderLogin = person.Login;
+            return message;
+        }
+        public async Task<IEnumerable<GroupMessageResponse>> ChangeStatusIncomingMessagesAsync(int groupId)
+        {
+            var messages = await _groupMessageRepository.ChangeStatusIncomingMessagesAsync(groupId);
+            var response = _mapper.Map<IEnumerable<GroupMessageResponse>>(messages);
+            foreach (var message in response)
+            {
+                var person = await _personRepository.GetByIdAsync(message.SenderId);
+                if (person != null) message.SenderLogin = person.Login;
+            }
+            return response;
         }
     }
 }

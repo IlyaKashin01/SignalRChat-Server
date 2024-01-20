@@ -15,6 +15,7 @@ namespace SignalRChat.Core.DTO.Members
     {
         public int Id { get; set; }
         public int GroupId { get; set; }
+        public int PersonId { get; set; }
         public string MemberLogin { get; set; } = string.Empty;
         public string AddedByPersonLogin { get; set; } = string.Empty;
         public DateTime AddedDate { get; set; } = DateTime.UtcNow;

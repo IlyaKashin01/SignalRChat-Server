@@ -13,8 +13,7 @@ namespace SignalRChat.Data.ModelConfig
                 .HasColumnName("created_date")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
             builder.Property(x => x.UpdatedDate)
-                .HasColumnName("updated_date")
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                .HasColumnName("updated_date");
             builder.Property(x => x.DeleteDate).HasColumnName("delete_date");
         }
     }

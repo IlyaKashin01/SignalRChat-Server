@@ -17,12 +17,12 @@ namespace SignalRChat.Data.Repositories.Impl
 
         public async Task<GroupMember?> FindGroupMemberByPersonIdAsync(int groupId, int personId)
         {
-            return await _context.GroupMembers.FirstOrDefaultAsync(x => x.GroupId == groupId && x.PersonId == personId); 
+            return await _context.GroupMembers.FirstOrDefaultAsync(x => x.GroupId == groupId && x.PersonId == personId && x.DeleteDate == null); 
         }
 
         public async Task<IEnumerable<GroupMember>> GetAllGroupMembersAsync(int groupId)
         {
-            return await _context.GroupMembers.Where(x => x.GroupId == groupId).ToListAsync();
+            return await _context.GroupMembers.Where(x => x.GroupId == groupId && x.DeleteDate == null).ToListAsync();
         }
     }
 }

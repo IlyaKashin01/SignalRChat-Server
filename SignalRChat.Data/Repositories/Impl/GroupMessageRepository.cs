@@ -13,8 +13,14 @@ namespace SignalRChat.Data.Repositories.Impl
     {
         public GroupMessageRepository(AppDbContext dbContext) : base(dbContext) { }
 
-        public async Task<IEnumerable<GroupMessage>> GetAllMessageInGroupAsync(int groupId)
+        public async Task<IEnumerable<GroupMessage>> GetAllMessageInGroupAsync(int groupId, int? personId)
         {
+            if (personId != 0)
+            {
+                var member = await _context.GroupMembers.FirstOrDefaultAsync(x => x.GroupId == groupId && x.PersonId == personId && x.DeleteDate != null);
+                if (member != null)
+                    return await _context.GroupMessages.Where(x => x.GroupId == groupId && x.SentAt <= member.DeleteDate).ToListAsync();
+            }
             return await _context.GroupMessages.Where(x => x.GroupId == groupId).ToListAsync();
         }
 
@@ -35,5 +41,18 @@ namespace SignalRChat.Data.Repositories.Impl
             }
             return false;
         }
+
+        public async Task<IEnumerable<GroupMessage>> ChangeStatusIncomingMessagesAsync(int groupId)
+        {
+            var messages = await _context.GroupMessages.Where(x => x.GroupId == groupId && x.IsCheck == false).ToListAsync();
+
+            foreach (var message in messages)
+            {
+                message.IsCheck = true;
+                await _context.SaveChangesAsync();
+            }
+            return messages;
+        }
+        
     }
 }

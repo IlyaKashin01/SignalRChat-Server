@@ -56,11 +56,6 @@ namespace SignalRChat.Core.Service.Impl
             return response;
         }
 
-        public Task<PersonalMessageResponse> GetLastPersonalMessageByIdAsync(int senderId, int recipientId)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<PersonalMessageResponse> SavePersonalMessageAsync(PersonalMessageRequest request)
         {
             var message = _mapper.Map<PersonalMessage>(request);

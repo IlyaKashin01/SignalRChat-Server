@@ -16,7 +16,8 @@ namespace SignalRChat.Data.Repositories.Impl
         {
             return await _context.Groups
                 .Where(x => x.PersonId == personId)
-                .Union(_context.GroupMembers.Where(x => x.PersonId == personId).Select(x => x.Group))
+                .Union(_context.GroupMembers.Where(x => x.PersonId == personId || (x.PersonId == personId && x.DeleteDate != null))
+                .Select(x => x.Group))
                 .ToListAsync();
         }
 
@@ -34,6 +35,33 @@ namespace SignalRChat.Data.Repositories.Impl
                                  .OrderBy(x => x.SentAt)
                                  .LastOrDefaultAsync();
 
+        }
+
+        public async Task<bool> LeaveGroupAsync(int groupId, int personId)
+        {
+            var deletedPerson = await _context.GroupMembers.FirstOrDefaultAsync(x => x.GroupId == groupId && x.PersonId == personId);
+
+            if (deletedPerson != null)
+            {
+                deletedPerson.DeleteDate = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<bool> ReturnToGroupAsync(int groupId, int personId)
+        {
+            var deletedPerson = await _context.GroupMembers.FirstOrDefaultAsync(x => x.GroupId == groupId && x.PersonId == personId);
+
+            if (deletedPerson != null)
+            {
+                deletedPerson.DeleteDate = null;
+                deletedPerson.UpdatedDate = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+                return false;
+            }
+            return true;
         }
     }
 }

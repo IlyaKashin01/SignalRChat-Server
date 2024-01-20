@@ -100,5 +100,15 @@ namespace SignalRChat.Core.Service.Impl
             }
             return "";
         }
+
+        public async Task<bool> LeaveGroupAsync(int groupId, int personId)
+        {
+            return await _groupRepository.LeaveGroupAsync(groupId, personId);
+        }
+
+        public async Task<bool> ReturnToGroupAsync(int groupId, int personId)
+        {
+            return await _groupRepository.ReturnToGroupAsync(groupId, personId);
+        }
     }
 }

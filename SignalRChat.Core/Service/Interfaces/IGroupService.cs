@@ -17,5 +17,7 @@ namespace SignalRChat.Core.Service.Interfaces
         Task<GroupResponse> GetGroupByIdAsync(int groupId);
         Task<string> GetCreatorLoginAsync(int groupId);
         Task<IEnumerable<MemberInGroup>> GetAllMembersInGroupAsync(int groupId);
+        Task<bool> LeaveGroupAsync(int groupId, int personId);
+        Task<bool> ReturnToGroupAsync(int groupId, int personId);
     }
 }

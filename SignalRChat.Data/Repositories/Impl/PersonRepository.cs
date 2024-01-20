@@ -36,8 +36,9 @@ namespace SignalRChat.Data.Repositories.Impl
             if (group != null)
             {
                 var members = await _context.GroupMembers.Where(x => x.GroupId == groupId).Select(m => m.PersonId).ToListAsync();
+                var deletedMembers = await _context.GroupMembers.Where(x => x.GroupId == groupId && x.DeleteDate != null).Select(m => m.PersonId).ToListAsync();
                 var users = await _context.Users.Where(x => x.Id != personId).ToListAsync();
-                return users.Except(await _context.Users.Where(x => members.Contains(x.Id) || x.Id == group.PersonId).ToListAsync());
+                return users.Except(await _context.Users.Where(x => members.Contains(x.Id) || deletedMembers.Contains(x.Id) || x.Id == group.PersonId).ToListAsync());
             }
             return await _context.Users.Where(x => x.Id != personId).ToListAsync();
         }

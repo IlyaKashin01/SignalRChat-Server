@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SignalRChat.Data.ModelConfig;
 using SignalRChat.Domain.Entities;
-using System.Security.Principal;
 
 namespace TravelApi.Infrastructure.Data.Extensions
 {
@@ -23,7 +22,7 @@ namespace TravelApi.Infrastructure.Data.Extensions
             modelBuilder.Entity<PersonalMessage>().HasQueryFilter(e => e.DeleteDate == null);
             modelBuilder.Entity<GroupMessage>().HasQueryFilter(e => e.DeleteDate == null);
             modelBuilder.Entity<GroupChatRoom>().HasQueryFilter(e => e.DeleteDate == null);
-            modelBuilder.Entity<GroupMember>().HasQueryFilter(e => e.DeleteDate == null);
+            // modelBuilder.Entity<GroupMember>().HasQueryFilter(e => e.DeleteDate == null);
             modelBuilder.Entity<Person>().HasQueryFilter(e => e.DeleteDate == null);
 
             return modelBuilder;

@@ -11,5 +11,7 @@ namespace SignalRChat.Data.Repositories.Interfaces
         Task<int> GetCreatorIdAsync(int groupId);
         Task<IEnumerable<GroupChatRoom?>> GetAllGroupAsync(int personId);
         Task<GroupMessage?> GetLastGroupMessageAsync(int groupId);
+        Task<bool> LeaveGroupAsync(int groupId, int personId);
+        Task<bool> ReturnToGroupAsync(int groupId, int personId);
     }
 }

@@ -10,7 +10,7 @@ namespace SignalRChat.Domain.Entities
     {
         public int Id { get; set; }
         public DateTime CreatedDate { get; set; }
-        public DateTime UpdatedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
         public DateTime? DeleteDate { get; set; }
     }
 }
