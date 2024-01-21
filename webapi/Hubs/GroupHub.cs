@@ -12,15 +12,13 @@ namespace webapi.Hubs
     [Authorize]
     public class GroupHub : Hub
     {
-        private readonly IPersonalMessageService _personalMessageService;
         private readonly IGroupService _groupService;
         private readonly IGroupMessageService _groupMessageService;
         private readonly IPersonService _personService;
         private static ConcurrentDictionary<int, string> pullConections = new ConcurrentDictionary<int, string>();
 
-        public GroupHub(IPersonalMessageService personalMessageService, IGroupMessageService groupMessageService, IGroupService groupService, IPersonService personService)
+        public GroupHub(IGroupMessageService groupMessageService, IGroupService groupService, IPersonService personService)
         {
-            _personalMessageService = personalMessageService;
             _groupMessageService = groupMessageService;
             _groupService = groupService;
             _personService = personService;

@@ -72,5 +72,10 @@ namespace SignalRChat.Data.Repositories.Impl
             }
             return messages;
         }
+
+        public async Task<IEnumerable<Person>> GetUsersInPersonalDialogAsync(int senderId, int recipientId)
+        {
+            return await _context.Users.Where(x => x.Id == senderId || x.Id == recipientId).ToListAsync();
+        }
     }
 }

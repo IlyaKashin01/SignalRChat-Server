@@ -12,6 +12,7 @@ namespace SignalRChat.Core.Service.Interfaces
     public interface IPersonalMessageService
     {
         Task<PersonalMessageResponse> SavePersonalMessageAsync(PersonalMessageRequest request);
+        Task<IEnumerable<Dialog>> SavePersonalMessageWithCreateDialogAsync(PersonalMessageRequest request);
         Task<IEnumerable<PersonalMessageResponse>> GetAllMessageInDialogAsync(int myId, int personId);
         Task<IEnumerable<Dialog>> GetAllDialogsAsync(int personId);
         Task<bool> UpdatePersonalMessageAsync(PersonalMessageResponse request);

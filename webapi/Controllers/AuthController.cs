@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SignalRChat.Common.OperationResult;
 using SignalRChat.Core.Dto.Auth;
+using SignalRChat.Core.DTO;
+using SignalRChat.Core.DTO.Messages;
 using SignalRChat.Core.Service.Interfaces;
 
 namespace webapi
@@ -10,9 +12,11 @@ namespace webapi
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        public AuthController(IAuthService authService)
+        private readonly IPersonalMessageService _personalMessageService;
+        public AuthController(IAuthService authService, IPersonalMessageService personalMessageService)
         {
             _authService = authService;
+            _personalMessageService = personalMessageService;
         }
 
         [HttpPost("signin")]
@@ -29,6 +33,13 @@ namespace webapi
             var response = await _authService.SingupAsync(request);
             if (response.Success) return Ok(response);
             return BadRequest(response);
+        }
+
+        [HttpPost("save")]
+        public async Task<ActionResult<Dialog>> Save(PersonalMessageRequest request)
+        {
+            var response = await _personalMessageService.SavePersonalMessageWithCreateDialogAsync(request);
+            return Ok(response);
         }
     } 
 }

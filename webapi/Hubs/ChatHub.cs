@@ -1,15 +1,11 @@
-﻿using AutoMapper.Execution;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.SignalR;
+using SignalRChat.Core.DTO;
 using SignalRChat.Core.DTO.Messages;
 using SignalRChat.Core.Service.Interfaces;
-using SignalRChat.Domain.Entities;
-using System;
 using System.Collections.Concurrent;
 using System.Security.Claims;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace webapi.Hubs
 {
@@ -19,17 +15,17 @@ namespace webapi.Hubs
         private readonly IPersonalMessageService _personalMessageService;
         private readonly IGroupService _groupService;
         private readonly IPersonService _personService;
-        private readonly IHubContext<GroupHub> _groupHubContext;
+        private readonly IMapper _mapper;
         private static ConcurrentDictionary<int, string> pullConections = new ConcurrentDictionary<int, string>();
 
-        public ChatHub(IPersonalMessageService personalMessageService, IGroupService groupService, IPersonService personService, IHubContext<GroupHub> groupHubContext)
+        public ChatHub(IPersonalMessageService personalMessageService, IGroupService groupService, IPersonService personService, IMapper mapper)
         {
             _personalMessageService = personalMessageService;
             _groupService = groupService;
             _personService = personService;
-            _groupHubContext = groupHubContext;
+            _mapper = mapper;
         }
-
+        #region connection
         public override Task OnConnectedAsync()
         {
             int userId = int.Parse(Context!.User!.Claims.First(c => c.Type == ClaimTypes.Sid).Value);
@@ -54,7 +50,7 @@ namespace webapi.Hubs
             pullConections.TryGetValue(userId, out string? connectionId);
             return connectionId;
         }
-
+        #endregion
         public async Task GetOnlineMarkers()
         {
             await Clients.All.SendAsync("OnlineMarkers", pullConections.Keys.ToList());
@@ -70,23 +66,30 @@ namespace webapi.Hubs
 
         public async Task SendPersonalMessage(PersonalMessageRequest message)
         {
-            var createdMessage = await _personalMessageService.SavePersonalMessageAsync(message);
-            if (createdMessage != null)
+            var recipientConnection = GetConnectionId(message.RecipientId);
+            if(recipientConnection != null)
+            if (message.IsNewDialog)
             {
-                var recipientConnection = pullConections.FirstOrDefault(x => x.Key == message.RecipientId).Value;
-                if(message.IsNewDialog) await GetAllDialogs(message.RecipientId);
-                if (recipientConnection != null)
-                {
-                    await Clients.Clients(
-                        pullConections.FirstOrDefault(x => x.Key == message.SenderId).Value,
-                        recipientConnection)
-                                      .SendAsync("NewMessage", createdMessage);
-                    await Clients.Client(recipientConnection).SendAsync("Notification", createdMessage.SenderLogin, createdMessage.Content);
-                }
-                else 
-                    await Clients.Caller.SendAsync("NewMessage", createdMessage);
+                var newDialog = await _personalMessageService.SavePersonalMessageWithCreateDialogAsync(message);
+                    if (recipientConnection != null)
+                    {
+                        await Clients.Client(recipientConnection).SendAsync("NewDialog", newDialog.Last());
+                        await Clients.Client(recipientConnection).SendAsync("Notification", newDialog.Last().Name, newDialog.Last().LastMessage);
+                    }
+                    await Clients.Caller.SendAsync("NewDialog", newDialog.First());
             }
-            else await Clients.Caller.SendAsync("Error", "ошибка сохранения сообщения в БД");
+            else 
+            {
+                var createdMessage = await _personalMessageService.SavePersonalMessageAsync(message);
+                if (createdMessage != null)
+                {
+                    await Clients.Client(recipientConnection).SendAsync("NewMessage", createdMessage);
+                    await Clients.Client(recipientConnection).SendAsync("Notification", createdMessage.SenderLogin, createdMessage.Content);
+                    await Clients.Caller.SendAsync("NewMessage", createdMessage);
+                }
+                else
+                    await Clients.Caller.SendAsync("Error", "ошибка сохранения сообщения в БД");
+            }
         }
 
         public async Task GetAllPersonalMessages(GetPersonalMessagesRequest request)
