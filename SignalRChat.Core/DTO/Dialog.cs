@@ -13,6 +13,9 @@ namespace SignalRChat.Core.DTO
         public string LastMessage { get; set; } = string.Empty;
         public bool IsCheck { get; set; }
         public DateTime DateTime { get; set; }
+        public int CountUnreadMessages { get; set; }
         public bool IsGroup { get; set; }
+        public int? CountMembers { get; set; }
+        public string? CreatorLogin {  get; set; }
     }
 }

@@ -12,6 +12,7 @@ namespace SignalRChat.Data.Repositories.Interfaces
         Task<IEnumerable<PersonalMessage>> GetAllMessagesInDialogAsync(int myId, int personId);
         Task<IEnumerable<Person>> GetAllPersonalDialogsAsync(int personId);
         Task<IEnumerable<Person>> GetUsersInPersonalDialogAsync(int senderId, int recipientId);
+        Task<int> GetCountUnreadMessagesInPersonalDialogAsync(int senderId, string recipientLogin);
         Task<PersonalMessage> GetLastPersonalMessageAsync(int senderId, int recipientId);
         Task<IEnumerable<PersonalMessage>> SearchPersonalMessageAsync(string message, int senderId, int recipientId);
         Task<PersonalMessage> UpdateMessageAsync(PersonalMessage message);

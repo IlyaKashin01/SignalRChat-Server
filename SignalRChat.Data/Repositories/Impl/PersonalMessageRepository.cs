@@ -77,5 +77,15 @@ namespace SignalRChat.Data.Repositories.Impl
         {
             return await _context.Users.Where(x => x.Id == senderId || x.Id == recipientId).ToListAsync();
         }
+
+        public async Task<int> GetCountUnreadMessagesInPersonalDialogAsync(int senderId, string recipientLogin)
+        {
+            var recipient = await _context.Users.FirstOrDefaultAsync(x => x.Login == recipientLogin);
+            if (recipient != null)
+            return await _context.PersonalMessages
+            .Where(m => ((m.SenderId == recipient.Id && m.RecipientId == senderId) && m.IsCheck == false))
+            .CountAsync();
+            return 0;
+        }
     }
 }

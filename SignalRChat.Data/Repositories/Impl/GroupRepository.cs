@@ -21,12 +21,20 @@ namespace SignalRChat.Data.Repositories.Impl
                 .ToListAsync();
         }
 
-        public async Task<int> GetCreatorIdAsync(int groupId)
+        public async Task<int> GetCountMembersInGroupAsync(int groupId)
+        {
+            return await _context.GroupMembers.Where(x => x.GroupId == groupId).CountAsync();
+        }
+
+        public async Task<int> GetCountUnreadMessagesInGroupAsync(int groupId)
+        {
+            return await _context.GroupMessages.Where(x => x.GroupId == groupId && x.IsCheck == false).CountAsync();
+        }
+
+        public async Task<string?> GetCreatorLoginAsync(int groupId)
         {
             var id = await _context.Groups.Where(x => x.Id == groupId).Select(x => x.PersonId).FirstOrDefaultAsync();
-            if (id != 0)
-                return id;
-            return 0;
+            return await _context.Users.Where(x => x.Id == id).Select(x => x.Login).FirstOrDefaultAsync();
         }
         public async Task<GroupMessage?> GetLastGroupMessageAsync(int groupId)
         {

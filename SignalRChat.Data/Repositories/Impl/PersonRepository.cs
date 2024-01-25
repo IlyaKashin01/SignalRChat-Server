@@ -42,5 +42,10 @@ namespace SignalRChat.Data.Repositories.Impl
             }
             return await _context.Users.Where(x => x.Id != personId).ToListAsync();
         }
+
+        public async Task<string?> GetLoginByIdAsync(int id)
+        {
+            return await _context.Users.Where(x => x.Id == id).Select(x => x.Login).FirstOrDefaultAsync();
+        }
     }
 }

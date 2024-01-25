@@ -51,6 +51,7 @@ namespace webapi.Hubs
             return connectionId;
         }
         #endregion
+        #region users
         public async Task GetOnlineMarkers()
         {
             await Clients.All.SendAsync("OnlineMarkers", pullConections.Keys.ToList());
@@ -63,7 +64,8 @@ namespace webapi.Hubs
             else
                 await Clients.Caller.SendAsync("Error", "нет новых пользователей, с которыми можно начать диалог");
         }
-
+        #endregion
+        #region messages
         public async Task SendPersonalMessage(PersonalMessageRequest message)
         {
             var recipientConnection = GetConnectionId(message.RecipientId);
@@ -73,22 +75,26 @@ namespace webapi.Hubs
                 var newDialog = await _personalMessageService.SavePersonalMessageWithCreateDialogAsync(message);
                     if (recipientConnection != null)
                     {
-                        await Clients.Client(recipientConnection).SendAsync("NewDialog", newDialog.Last());
-                        await Clients.Client(recipientConnection).SendAsync("Notification", newDialog.Last().Name, newDialog.Last().LastMessage);
+                        var responseForRecipient = newDialog.FirstOrDefault(x => x.Name != message.PersonLogin);
+                        if (responseForRecipient != null)
+                        {
+                            await Clients.Client(recipientConnection).SendAsync("NewDialog", responseForRecipient);
+                            await Clients.Client(recipientConnection).SendAsync("Notification", responseForRecipient.Name, responseForRecipient.LastMessage);
+                        }
                     }
-                    await Clients.Caller.SendAsync("NewDialog", newDialog.First());
+                    await Clients.Caller.SendAsync("NewDialog", newDialog.FirstOrDefault(x => x.Name == message.PersonLogin));
             }
             else 
             {
                 var createdMessage = await _personalMessageService.SavePersonalMessageAsync(message);
-                if (createdMessage != null)
+                if (createdMessage.Result != null)
                 {
-                    await Clients.Client(recipientConnection).SendAsync("NewMessage", createdMessage);
-                    await Clients.Client(recipientConnection).SendAsync("Notification", createdMessage.SenderLogin, createdMessage.Content);
-                    await Clients.Caller.SendAsync("NewMessage", createdMessage);
+                    await Clients.Client(recipientConnection).SendAsync("NewMessage", createdMessage.Result);
+                    await Clients.Client(recipientConnection).SendAsync("Notification", createdMessage.Result.SenderLogin, createdMessage.Result.Content);
+                    await Clients.Caller.SendAsync("NewMessage", createdMessage.Result);
                 }
                 else
-                    await Clients.Caller.SendAsync("Error", "ошибка сохранения сообщения в БД");
+                    await Clients.Caller.SendAsync("Error", $"ошибка сохранения сообщения в БД: {createdMessage.ErrorCode} {createdMessage.Message}");
             }
         }
 
@@ -107,20 +113,6 @@ namespace webapi.Hubs
             else
                 await Clients.Caller.SendAsync("Error", "сообщений нет");
         }
-        public async Task GetAllDialogs(int personId)
-        {
-            var personalDialogs = await _personalMessageService.GetAllDialogsAsync(personId);
-
-            var groups = await _groupService.GetAllGroupsAsync(personId);
-
-            var dialogs = personalDialogs.Union(groups).OrderBy(x => x.Name);
-
-            if (dialogs != null)
-                await Clients.Caller.SendAsync("AllDialogs", dialogs);
-            else
-                await Clients.Caller.SendAsync("Error", "нет диалогов");
-        }
-
         public async Task ChangeStatusIncomingMessagesAsync(int senderId, int recipientId)
         {
             var messages = await _personalMessageService.ChangeStatusIncomingMessagesAsync(senderId, recipientId);
@@ -138,5 +130,21 @@ namespace webapi.Hubs
             else
                 await Clients.Caller.SendAsync("Error", "ошибка при изменении статуса полученных сообщений");
         }
+        #endregion
+        #region dialogs
+        public async Task GetAllDialogs(int personId)
+        {
+            var personalDialogs = await _personalMessageService.GetAllDialogsAsync(personId);
+
+            var groups = await _groupService.GetAllGroupsAsync(personId);
+
+            var dialogs = personalDialogs.Union(groups).OrderBy(x => x.Name);
+
+            if (dialogs != null)
+                await Clients.Caller.SendAsync("AllDialogs", dialogs);
+            else
+                await Clients.Caller.SendAsync("Error", "нет диалогов");
+        }
+        #endregion
     }
 }

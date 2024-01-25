@@ -1,4 +1,5 @@
-﻿using SignalRChat.Core.Dto.Auth;
+﻿using SignalRChat.Common.OperationResult;
+using SignalRChat.Core.Dto.Auth;
 using SignalRChat.Core.DTO;
 using SignalRChat.Core.DTO.Messages;
 using System;
@@ -11,7 +12,7 @@ namespace SignalRChat.Core.Service.Interfaces
 {
     public interface IPersonalMessageService
     {
-        Task<PersonalMessageResponse> SavePersonalMessageAsync(PersonalMessageRequest request);
+        Task<OperationResult<PersonalMessageResponse>> SavePersonalMessageAsync(PersonalMessageRequest request);
         Task<IEnumerable<Dialog>> SavePersonalMessageWithCreateDialogAsync(PersonalMessageRequest request);
         Task<IEnumerable<PersonalMessageResponse>> GetAllMessageInDialogAsync(int myId, int personId);
         Task<IEnumerable<Dialog>> GetAllDialogsAsync(int personId);

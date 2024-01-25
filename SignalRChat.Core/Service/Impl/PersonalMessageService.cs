@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using SignalRChat.Common.OperationResult;
 using SignalRChat.Core.Dto.Auth;
 using SignalRChat.Core.DTO;
 using SignalRChat.Core.DTO.Messages;
@@ -37,6 +38,7 @@ namespace SignalRChat.Core.Service.Impl
                 if (lastMessage != null)
                 {
                     _mapper.Map(lastMessage, dialog);
+                    dialog.CountUnreadMessages = await _personalMessageRepository.GetCountUnreadMessagesInPersonalDialogAsync(personId, dialog.Name);
                 }    
             }
             return response;
@@ -56,24 +58,29 @@ namespace SignalRChat.Core.Service.Impl
             return response;
         }
 
-        public async Task<PersonalMessageResponse> SavePersonalMessageAsync(PersonalMessageRequest request)
+        public async Task<OperationResult<PersonalMessageResponse>> SavePersonalMessageAsync(PersonalMessageRequest request)
         {
             var message = _mapper.Map<PersonalMessage>(request);
             var recipient = await _personRepository.GetByIdAsync(request.RecipientId); 
             if (recipient != null)
                 message.Recipient = recipient;
 
-            await _personalMessageRepository.CreateAsync(message);
-            var response = _mapper.Map<PersonalMessageResponse>(message);
-            var person = await _personRepository.GetByIdAsync(request.SenderId);
-            if (person != null)
-                response.SenderLogin = person.Login;
-            var lastMessage = await _personalMessageRepository.GetLastPersonalMessageAsync(response.SenderId, response.RecipientId);
-            if (lastMessage != null)
+            if (await _personalMessageRepository.CreateAsync(message) != 0)
             {
-                _mapper.Map(lastMessage, response);
+                var response = _mapper.Map<PersonalMessageResponse>(message);
+                response.Id = message.Id;
+                var person = await _personRepository.GetByIdAsync(request.SenderId);
+                if (person != null)
+                    response.SenderLogin = person.Login;
+                var lastMessage = await _personalMessageRepository.GetLastPersonalMessageAsync(response.SenderId, response.RecipientId);
+                if (lastMessage != null)
+                {
+                    _mapper.Map(lastMessage, response);
+                }
+                return new OperationResult<PersonalMessageResponse>(response);
             }
-            return response;
+            return OperationResult<PersonalMessageResponse>.Fail(OperationCode.Error, "Не удалось сохранить сообщение в БД");
+
         }
 
         public Task<bool> UpdatePersonalMessageAsync(PersonalMessageResponse request)
@@ -99,12 +106,12 @@ namespace SignalRChat.Core.Service.Impl
             var message = await SavePersonalMessageAsync(request);
             if (message != null)
             {
-                var persons = await _personalMessageRepository.GetUsersInPersonalDialogAsync(message.SenderId, message.RecipientId);
+                var persons = await _personalMessageRepository.GetUsersInPersonalDialogAsync(message.Result!.SenderId, message.Result!.RecipientId);
 
                 var dialogs = _mapper.Map<IEnumerable<Dialog>>(persons);
                 foreach (var dialog in dialogs)
                 {
-                    var lastMessage = await _personalMessageRepository.GetLastPersonalMessageAsync(message.SenderId, message.RecipientId);
+                    var lastMessage = await _personalMessageRepository.GetLastPersonalMessageAsync(message.Result!.SenderId, message.Result!.RecipientId);
                     if (lastMessage != null)
                     {
                         response.Add(_mapper.Map(lastMessage, dialog));

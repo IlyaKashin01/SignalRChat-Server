@@ -1,22 +1,19 @@
-﻿using SignalRChat.Core.DTO;
+﻿using SignalRChat.Common.OperationResult;
+using SignalRChat.Core.DTO;
 using SignalRChat.Core.DTO.Group;
 using SignalRChat.Core.DTO.Members;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SignalRChat.Core.DTO.Messages;
 
 namespace SignalRChat.Core.Service.Interfaces
 {
     public interface IGroupService
     {
-        Task<int> CreateGroupAsync(GroupRequest request);
+        Task<OperationResult<Dialog>> CreateGroupAsync(GroupRequest request);
         Task<IEnumerable<Dialog>> GetAllGroupsAsync(int personId);
-        Task<int> AddPersonToGroupAsync(MemberRequest request);
+        Task<OperationResult<Dialog>> GetGroupDialogByIdAsync(int groupId);
+        Task<OperationResult<GroupMessageResponse>> AddPersonToGroupAsync(MemberRequest request);
         Task<GroupResponse> GetGroupByIdAsync(int groupId);
-        Task<string> GetCreatorLoginAsync(int groupId);
-        Task<IEnumerable<MemberInGroup>> GetAllMembersInGroupAsync(int groupId);
+        Task<OperationResult<MemberResponse>> GetAllMembersInGroupAsync(int groupId);
         Task<bool> LeaveGroupAsync(int groupId, int personId);
         Task<bool> ReturnToGroupAsync(int groupId, int personId);
     }

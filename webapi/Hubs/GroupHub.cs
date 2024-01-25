@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using SignalRChat.Core.DTO;
 using SignalRChat.Core.DTO.Group;
 using SignalRChat.Core.DTO.Members;
 using SignalRChat.Core.DTO.Messages;
@@ -15,13 +17,15 @@ namespace webapi.Hubs
         private readonly IGroupService _groupService;
         private readonly IGroupMessageService _groupMessageService;
         private readonly IPersonService _personService;
+        private readonly IMapper _mapper;
         private static ConcurrentDictionary<int, string> pullConections = new ConcurrentDictionary<int, string>();
 
-        public GroupHub(IGroupMessageService groupMessageService, IGroupService groupService, IPersonService personService)
+        public GroupHub(IGroupMessageService groupMessageService, IGroupService groupService, IPersonService personService, IMapper mapper)
         {
             _groupMessageService = groupMessageService;
             _groupService = groupService;
             _personService = personService;
+            _mapper = mapper;
         }
 
         #region connection hub
@@ -81,11 +85,11 @@ namespace webapi.Hubs
         #region group management
         public async Task CreateGroup(GroupRequest request)
         {
-            var groupId = await _groupService.CreateGroupAsync(request);
-            if (groupId != 0)
-                await Clients.Caller.SendAsync("NewGroup", groupId);
+            var group = await _groupService.CreateGroupAsync(request);
+            if (group.Result != null)
+                await Clients.Caller.SendAsync("NewGroup", group.Result);
             else
-                await Clients.Caller.SendAsync("Error", "ошибка создания группы");
+                await Clients.Caller.SendAsync("Error", $"{group.ErrorCode} {group.Message}");
         }
         public async Task LeaveGroupAsync(LeaveGroupRequest request)
         {
@@ -140,7 +144,7 @@ namespace webapi.Hubs
                 if (connectionId != null)
                 {
                     await Groups.AddToGroupAsync(connectionId, groupName);
-                    await _groupMessageService.SaveGroupMessageAsync(new GroupMessageRequest { Content = $"{personLogin} покинул группу", GroupId = groupId, SenderId = 0 });
+                    await _groupMessageService.SaveGroupMessageAsync(new GroupMessageRequest { Content = $"{personLogin} вернулся группу", GroupId = groupId, SenderId = 0 });
                     await Clients.Group(groupName).SendAsync("NewGroupMessage", $"{personLogin} вернулся в группу");
                     await Clients.Caller.SendAsync("memberStatus", result);
                 }
@@ -209,46 +213,39 @@ namespace webapi.Hubs
                 await Clients.Caller.SendAsync("Error", "нет пользователей, доступных для добавления в группу");
         }
 
-
         public async Task AddPersonToGroup(MemberRequest request)
         {
-            var group = await _groupService.GetGroupByIdAsync(request.GroupId);
-            if (group != null)
+            var group = await _groupService.GetGroupDialogByIdAsync(request.GroupId);
+            if (group.Result != null)
             {
-                var memberId = await _groupService.AddPersonToGroupAsync(request);
-                if (memberId != 0)
+                var memberMessage = await _groupService.AddPersonToGroupAsync(request);
+                if (memberMessage.Result != null)
                 {
                     var connectionId = GetConnectionId(request.PersonId);
                     if (connectionId != null)
                     {
-                        await Groups.AddToGroupAsync(connectionId, group.Name);
-                        await Clients.Client(connectionId).SendAsync("Notification", group.Name, "Вас добавили в группу");
+                        await Groups.AddToGroupAsync(connectionId, group.Result.Name);
+                        await Clients.Client(connectionId).SendAsync("NewGroup", group.Result);
+                        await Clients.Client(connectionId).SendAsync("Notification", group.Result.Name, "Вас добавили в группу");
                     }
-                    await this.Clients.Caller.SendAsync("PersonAdded", memberId);
-                    var addedPerson = await _personService.GetPersonByIdAsync(request.AddedByPerson);
-                    var person = await _personService.GetPersonByIdAsync(request.PersonId);
-                    if (addedPerson != null && person != null)
-                    {
-                        var message = await _groupMessageService.SaveGroupMessageAsync(new GroupMessageRequest { Content = $"{addedPerson.Login} добавил пользователя {person.Login} в группу", GroupId = group.Id, SenderId = 0 });
-                        if(message != null)
-                            await Clients.Group(group.Name).SendAsync("NewGroupMessage", message.Content);
-                    }
+                    await Clients.Caller.SendAsync("PersonAdded", memberMessage.Result);
+                    await Clients.Group(group.Result.Name).SendAsync("NewGroupMessage", memberMessage.Result);
                 }
+                else
+                    await Clients.Caller.SendAsync("Error", $"{memberMessage.ErrorCode} {memberMessage.Message}");
             }
             else
-                await this.Clients.Caller.SendAsync("Error", "Не удалось добавить пользователя в группу");
+                await Clients.Caller.SendAsync("Error", $"{group.ErrorCode} {group.Message}");
         }
         public async Task GetAllMembersInGroup(int groupId)
         {
             var members = await _groupService.GetAllMembersInGroupAsync(groupId);
-            var creatorLogin = await _groupService.GetCreatorLoginAsync(groupId);
-            if (members != null && creatorLogin != "")
-            {
-                var response = new MemberResponse { CreatorLogin = creatorLogin, GroupMembers = members.ToList() };
-                await Clients.Caller.SendAsync("AllMembers", response);
-            }
+            if (members.Result != null)
+                {
+                    await Clients.Caller.SendAsync("AllMembers", members.Result);
+                }
             else
-                await Clients.Caller.SendAsync("Error", "нет участников в группе");
+                await Clients.Caller.SendAsync("Error", $"{members.ErrorCode} {members.Message}");
         }
         #endregion
     } 
