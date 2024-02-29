@@ -9,9 +9,6 @@ namespace SignalRChat.Data.ModelConfig
         public virtual void Configure(EntityTypeBuilder<TEntity> builder)
         {
             builder.HasKey(x => x.Id);
-            builder.Property(x => x.CreatedDate)
-                .HasColumnName("created_date")
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
             builder.Property(x => x.UpdatedDate)
                 .HasColumnName("updated_date");
             builder.Property(x => x.DeleteDate).HasColumnName("delete_date");

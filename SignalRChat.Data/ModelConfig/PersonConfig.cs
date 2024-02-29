@@ -18,6 +18,9 @@ namespace SignalRChat.Data.ModelConfig
             builder.Property(e => e.Login).HasColumnName("login");
             builder.Property(e => e.PasswordHash).HasColumnName("password_hash");
             builder.Property(e => e.Role).HasColumnName("role");
+            builder.Property(x => x.RegistrationDate)
+                .HasColumnName("registration_date")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
         }
     }
 }

@@ -66,8 +66,8 @@ namespace SignalRChat.Core.Service.Impl
         {
             var group = _mapper.Map<GroupChatRoom>(request);
             var person = await _personRepository.GetByIdAsync(request.PersonId);
-            if(person != null)  group.Person = person; 
-            if( await _groupRepository.CreateAsync(group) != 0)
+            if (person != null) group.Person = person;
+            if (await _groupRepository.CreateAsync(group) != 0)
             {
                 var response = _mapper.Map<Dialog>(group);
                 var lastMessage = await _groupRepository.GetLastGroupMessageAsync(group.Id);
@@ -101,7 +101,7 @@ namespace SignalRChat.Core.Service.Impl
         public async Task<OperationResult<Dialog>> GetGroupDialogByIdAsync(int groupId)
         {
             var group = await _groupRepository.GetByIdAsync(groupId);
-            if(group != null)
+            if (group != null)
             {
                 var response = _mapper.Map<Dialog>(group);
                 var lastMessage = await _groupRepository.GetLastGroupMessageAsync(group.Id);
@@ -114,7 +114,7 @@ namespace SignalRChat.Core.Service.Impl
                 }
                 return new OperationResult<Dialog>(response);
             }
-            
+
             return OperationResult<Dialog>.Fail(OperationCode.EntityWasNotFound, "Группа не найдена");
         }
 
@@ -154,14 +154,67 @@ namespace SignalRChat.Core.Service.Impl
             return OperationResult<MemberResponse>.Fail(OperationCode.EntityWasNotFound, "Участники не найдены");
         }
 
-        public async Task<bool> LeaveGroupAsync(int groupId, int personId)
+        public async Task<OperationResult<LeaveAndReturnGroupResponse>> LeaveGroupAsync(LeaveGroupRequest request)
         {
-            return await _groupRepository.LeaveGroupAsync(groupId, personId);
+            var group = await _groupRepository.LeaveGroupAsync(request.groupId, request.personId, request.IsExcluded);
+            if (group != null)
+            {
+                if (request.creatorLogin == "")
+                {
+                    if (await _groupMessageRepository.CreateAsync(new GroupMessage
+                    {
+                        Content = $"{request.personLogin} покинул группу",
+                        GroupId = request.groupId,
+                        Group = group,
+                        SenderId = 0,
+                        IsCheck = false
+                    }) != 0)
+                        return new OperationResult<LeaveAndReturnGroupResponse>(new LeaveAndReturnGroupResponse { Message = $"{request.personLogin} покинул группу", GroupName = group.Name });
+                    else
+                        return OperationResult<LeaveAndReturnGroupResponse>.Fail(OperationCode.Error, "сообщение не сохранено в БД");
+                }
+                else
+                {
+                    var personLogin = await _personRepository.GetLoginByIdAsync(request.personId);
+                    if (personLogin != null)
+                    {
+                        if (await _groupMessageRepository.CreateAsync(new GroupMessage
+                        {
+                            Content = $"{request.creatorLogin} исключил {personLogin}",
+                            GroupId = request.groupId,
+                            Group = group,
+                            SenderId = 0,
+                            IsCheck = false
+                        }) != 0)
+                            return new OperationResult<LeaveAndReturnGroupResponse>(new LeaveAndReturnGroupResponse { Message = $"{request.creatorLogin} исключил {personLogin}", GroupName = group.Name });
+                        else
+                            return OperationResult<LeaveAndReturnGroupResponse>.Fail(OperationCode.Error, "сообщение не сохранено в БД");
+                    }
+                    else
+                        return OperationResult<LeaveAndReturnGroupResponse>.Fail(OperationCode.EntityWasNotFound, "попытка исключить не существующего пользователя");
+                }
+            }
+            else
+                return OperationResult<LeaveAndReturnGroupResponse>.Fail(OperationCode.EntityWasNotFound, "попытка исключить пользователя из не существующей группы");
         }
 
-        public async Task<bool> ReturnToGroupAsync(int groupId, int personId)
+        public async Task<OperationResult<LeaveAndReturnGroupResponse>> ReturnToGroupAsync(ReturnGroupRequest request)
         {
-            return await _groupRepository.ReturnToGroupAsync(groupId, personId);
+            var group = await _groupRepository.ReturnToGroupAsync(request.groupId, request.personId);
+            if (group != null)
+                if (await _groupMessageRepository.CreateAsync(new GroupMessage
+                {
+                    Content = $"{request.personLogin} вернулся группу",
+                    GroupId = request.groupId,
+                    Group = group,
+                    SenderId = 0,
+                    IsCheck = false
+                }) != 0)
+                    return new OperationResult<LeaveAndReturnGroupResponse>(new LeaveAndReturnGroupResponse { Message = $"{request.personLogin} вернулся группу", GroupName = group.Name });
+                else
+                    return OperationResult<LeaveAndReturnGroupResponse>.Fail(OperationCode.Error, "Сообщение не было сохранено в БД");
+            else
+                return OperationResult<LeaveAndReturnGroupResponse>.Fail(OperationCode.EntityWasNotFound, "Попытка вернуться в не существующую группу");
         }
     }
 }

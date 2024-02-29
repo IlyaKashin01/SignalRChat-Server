@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SignalRChat.Data.Repositories.Impl
 {
-    public class PersonalMessageRepository : BaseRepository<PersonalMessage>, IPersonalMessageRepository
+    public class PersonalMessageRepository : BaseMessageRepository<PersonalMessage>, IPersonalMessageRepository
     {
         public PersonalMessageRepository(AppDbContext context) : base(context)
         {

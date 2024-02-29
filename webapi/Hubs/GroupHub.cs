@@ -93,64 +93,33 @@ namespace webapi.Hubs
         }
         public async Task LeaveGroupAsync(LeaveGroupRequest request)
         {
-            var result = await _groupService.LeaveGroupAsync(request.groupId, request.personId);
-            if (result)
+            var result = await _groupService.LeaveGroupAsync(request);
+            if (result.Success && result.Result != null)
             {
                 var connectionId = GetConnectionId(request.personId);
                 var group = await _groupService.GetGroupByIdAsync(request.groupId);
-                if (connectionId != null)
+                if (group != null && connectionId != null)
                     await Groups.RemoveFromGroupAsync(connectionId, group.Name);
-                if (group != null)
-                {
-                    if (request.creatorLogin == "")
-                    {
-                        await _groupMessageService.SaveGroupMessageAsync(new GroupMessageRequest
-                        {
-                            Content = $"{request.personLogin} покинул группу",
-                            GroupId = request.groupId,
-                            SenderId = 0
-                        });
-                        await Clients.Group(group.Name).SendAsync("NewGroupMessage", $"{request.personLogin} покинул группу");
-                    }
-                    else
-                    {
-                        var person = await _personService.GetPersonByIdAsync(request.personId);
-                        if (person != null)
-                        {
-                            await _groupMessageService.SaveGroupMessageAsync(new GroupMessageRequest
-                            {
-                                Content = $"{request.creatorLogin} исключил {person.Login}",
-                                GroupId = request.groupId,
-                                SenderId = 0
-                            });
-                            await Clients.Group(group.Name).SendAsync("NewGroupMessage", $"{request.creatorLogin} исключил {person.Login}");
-                        }
-                        else
-                            await Clients.Caller.SendAsync("Error", "попытка исключить не существующего пользователя");
-                    }
-                    await Clients.Caller.SendAsync("memberStatus", result);
-                }
+                await Clients.Group(result.Result.GroupName).SendAsync("NewGroupMessage", result.Result.Message);
             }
             else
-                await Clients.Caller.SendAsync("Error", "ошибка при покидании группы");
+                await Clients.Caller.SendAsync("Error", $"{result.Message} {result.ErrorCode}");
         }
 
-        public async Task ReturnToGroupAsync(int groupId, string groupName, int personId, string personLogin)
+        public async Task ReturnToGroupAsync(ReturnGroupRequest request)
         {
-            var result = await _groupService.ReturnToGroupAsync(groupId, personId);
-            if (result)
+            var result = await _groupService.ReturnToGroupAsync(request);
+            if (result.Success && result.Result != null)
             {
-                var connectionId = GetConnectionId(personId);
+                var connectionId = GetConnectionId(request.personId);
                 if (connectionId != null)
                 {
-                    await Groups.AddToGroupAsync(connectionId, groupName);
-                    await _groupMessageService.SaveGroupMessageAsync(new GroupMessageRequest { Content = $"{personLogin} вернулся группу", GroupId = groupId, SenderId = 0 });
-                    await Clients.Group(groupName).SendAsync("NewGroupMessage", $"{personLogin} вернулся в группу");
-                    await Clients.Caller.SendAsync("memberStatus", result);
+                    await Groups.AddToGroupAsync(connectionId, result.Result.GroupName);
+                    await Clients.Group(result.Result.GroupName).SendAsync("NewGroupMessage", result.Result.Message);
                 }
             }
             else
-                await Clients.Caller.SendAsync("Error", "ошибка при покидании группы");
+                await Clients.Caller.SendAsync("Error", $"{result.Message} {result.ErrorCode}");
         }
         #endregion
 

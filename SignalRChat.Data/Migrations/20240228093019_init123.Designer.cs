@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SignalRChat.Data;
@@ -11,9 +12,11 @@ using SignalRChat.Data;
 namespace SignalRChat.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240228093019_init123")]
+    partial class init123
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -86,10 +89,6 @@ namespace SignalRChat.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("group_id");
 
-                    b.Property<bool>("IsLeaved")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_leaved");
-
                     b.Property<int>("PersonId")
                         .HasColumnType("integer")
                         .HasColumnName("member_id");
@@ -117,34 +116,26 @@ namespace SignalRChat.Data.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("content");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("DeleteDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("delete_date");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("GroupId")
                         .HasColumnType("integer")
                         .HasColumnName("group_id");
 
                     b.Property<bool>("IsCheck")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_check");
+                        .HasColumnType("boolean");
 
                     b.Property<int>("SenderId")
-                        .HasColumnType("integer")
-                        .HasColumnName("sender_id");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("SentAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("sent_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_date");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -209,34 +200,26 @@ namespace SignalRChat.Data.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("content");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("DeleteDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("delete_date");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsCheck")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_check");
+                        .HasColumnType("boolean");
 
                     b.Property<int>("RecipientId")
                         .HasColumnType("integer")
                         .HasColumnName("recipient_id");
 
                     b.Property<int>("SenderId")
-                        .HasColumnType("integer")
-                        .HasColumnName("sender_id");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("SentAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("sent_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_date");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 

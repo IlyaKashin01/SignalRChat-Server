@@ -104,17 +104,18 @@ namespace SignalRChat.Core.Service.Impl
         {
             var response = new List<Dialog>();
             var message = await SavePersonalMessageAsync(request);
-            if (message != null)
+            if (message.Result != null)
             {
-                var persons = await _personalMessageRepository.GetUsersInPersonalDialogAsync(message.Result!.SenderId, message.Result!.RecipientId);
+                var persons = await _personalMessageRepository.GetUsersInPersonalDialogAsync(message.Result.SenderId, message.Result.RecipientId);
 
                 var dialogs = _mapper.Map<IEnumerable<Dialog>>(persons);
                 foreach (var dialog in dialogs)
                 {
-                    var lastMessage = await _personalMessageRepository.GetLastPersonalMessageAsync(message.Result!.SenderId, message.Result!.RecipientId);
+                    var lastMessage = await _personalMessageRepository.GetLastPersonalMessageAsync(message.Result.SenderId, message.Result.RecipientId);
                     if (lastMessage != null)
                     {
                         response.Add(_mapper.Map(lastMessage, dialog));
+                        dialog.CountUnreadMessages = await _personalMessageRepository.GetCountUnreadMessagesInPersonalDialogAsync(message.Result.RecipientId, dialog.Name);
                     }
                 }
             }

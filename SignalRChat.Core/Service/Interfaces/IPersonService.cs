@@ -1,4 +1,5 @@
-﻿using SignalRChat.Core.Dto.Auth;
+﻿using SignalRChat.Common.OperationResult;
+using SignalRChat.Core.Dto.Auth;
 using SignalRChat.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -14,5 +15,6 @@ namespace SignalRChat.Core.Service.Interfaces
         Task<IEnumerable<PersonResponse>> GetAllUsersAsync(int personId);
         Task <PersonResponse> GetPersonByIdAsync(int personId);
         Task<IEnumerable<PersonResponse>> GetAllUsersToAddGroupAsync(int groupId, int personId);
+        Task<OperationResult<string>> GetLoginByIdAsync(int personId);
     }
 }

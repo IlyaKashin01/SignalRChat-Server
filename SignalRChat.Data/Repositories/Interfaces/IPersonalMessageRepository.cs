@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SignalRChat.Data.Repositories.Interfaces
 {
-    public interface IPersonalMessageRepository: IBaseRepository<PersonalMessage>
+    public interface IPersonalMessageRepository: IBaseMessageRepository<PersonalMessage>
     {
         Task<IEnumerable<PersonalMessage>> GetAllMessagesInDialogAsync(int myId, int personId);
         Task<IEnumerable<Person>> GetAllPersonalDialogsAsync(int personId);

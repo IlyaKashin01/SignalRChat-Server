@@ -45,31 +45,32 @@ namespace SignalRChat.Data.Repositories.Impl
 
         }
 
-        public async Task<bool> LeaveGroupAsync(int groupId, int personId)
+        public async Task<GroupChatRoom?> LeaveGroupAsync(int groupId, int personId, bool isExcluded)
         {
             var deletedPerson = await _context.GroupMembers.FirstOrDefaultAsync(x => x.GroupId == groupId && x.PersonId == personId);
 
             if (deletedPerson != null)
             {
-                deletedPerson.DeleteDate = DateTime.UtcNow;
+                if(isExcluded) deletedPerson.DeleteDate = DateTime.UtcNow;
+                else deletedPerson.IsLeaved = true;
                 await _context.SaveChangesAsync();
-                return true;
+                return deletedPerson.Group;
             }
-            return false;
+            return null;
         }
 
-        public async Task<bool> ReturnToGroupAsync(int groupId, int personId)
+        public async Task<GroupChatRoom?> ReturnToGroupAsync(int groupId, int personId)
         {
             var deletedPerson = await _context.GroupMembers.FirstOrDefaultAsync(x => x.GroupId == groupId && x.PersonId == personId);
 
             if (deletedPerson != null)
             {
-                deletedPerson.DeleteDate = null;
+                deletedPerson.IsLeaved = false;
                 deletedPerson.UpdatedDate = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
-                return false;
+                return deletedPerson.Group;
             }
-            return true;
+            return null;
         }
     }
 }

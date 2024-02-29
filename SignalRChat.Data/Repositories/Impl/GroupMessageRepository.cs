@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SignalRChat.Data.Repositories.Impl
 {
-    public class GroupMessageRepository: BaseRepository<GroupMessage> ,IGroupMessageRepository
+    public class GroupMessageRepository: BaseMessageRepository<GroupMessage> ,IGroupMessageRepository
     {
         public GroupMessageRepository(AppDbContext dbContext) : base(dbContext) { }
 

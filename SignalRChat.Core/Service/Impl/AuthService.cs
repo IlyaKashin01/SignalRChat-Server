@@ -58,7 +58,6 @@ namespace SignalRChat.Core.Service.Impl
 
             var person = _mapper.Map<Person>(request);
 
-            person.CreatedDate = DateTime.UtcNow;
             person.PasswordHash = BC.HashPassword(request.Password);
             person.Role = "user";
             var result = await _personRepository.CreateAsync(person);

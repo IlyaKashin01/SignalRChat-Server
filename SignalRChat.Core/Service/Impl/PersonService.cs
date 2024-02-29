@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using SignalRChat.Common.OperationResult;
 using SignalRChat.Core.Dto.Auth;
 using SignalRChat.Core.Service.Interfaces;
 using SignalRChat.Data.Repositories.Interfaces;
@@ -38,6 +39,14 @@ namespace SignalRChat.Core.Service.Impl
         {
             var person = await _personRepository.GetByIdAsync(personId);
             return _mapper.Map<PersonResponse>(person);
+        }
+
+        public async Task<OperationResult<string>> GetLoginByIdAsync(int personId)
+        {
+            var login = await _personRepository.GetLoginByIdAsync(personId);
+            if (!string.IsNullOrEmpty(login))
+                return new OperationResult<string>(login);
+            return OperationResult<string>.Fail(OperationCode.EntityWasNotFound, "Пользователя не существует");
         }
     }
 }

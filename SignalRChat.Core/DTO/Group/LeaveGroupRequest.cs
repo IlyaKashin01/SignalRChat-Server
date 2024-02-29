@@ -12,5 +12,6 @@ namespace SignalRChat.Core.DTO.Group
         public int personId { get; set; }
         public string personLogin {  get; set; } = string.Empty;
         public string creatorLogin { get; set; } = string.Empty;
+        public bool IsExcluded { get; set; }
     }
 }

@@ -12,8 +12,9 @@ namespace SignalRChat.Data.ModelConfig
             builder.ToTable("group_member");
             builder.Property(e => e.GroupId).HasColumnName("group_id");
             builder.Property(e => e.AddedByPerson).HasColumnName("added_by_person");
-            builder.Property(e => e.AddedDate).HasColumnName("added_date");
+            builder.Property(e => e.AddedDate).HasColumnName("added_date").HasDefaultValueSql("CURRENT_TIMESTAMP");
             builder.Property(e => e.PersonId).HasColumnName("member_id");
+            builder.Property(e => e.IsLeaved).HasColumnName("is_leaved");
         }
     }
 }

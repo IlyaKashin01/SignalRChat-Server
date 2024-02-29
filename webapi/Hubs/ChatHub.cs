@@ -68,29 +68,40 @@ namespace webapi.Hubs
         #region messages
         public async Task SendPersonalMessage(PersonalMessageRequest message)
         {
+            var personLogin = await _personService.GetLoginByIdAsync(message.SenderId);
             var recipientConnection = GetConnectionId(message.RecipientId);
-            if(recipientConnection != null)
             if (message.IsNewDialog)
             {
-                var newDialog = await _personalMessageService.SavePersonalMessageWithCreateDialogAsync(message);
+                if (personLogin.Result != null)
+                {
+                    var newDialog = await _personalMessageService.SavePersonalMessageWithCreateDialogAsync(message);
                     if (recipientConnection != null)
                     {
-                        var responseForRecipient = newDialog.FirstOrDefault(x => x.Name != message.PersonLogin);
+                        var responseForRecipient = newDialog.FirstOrDefault(x => x.Name == personLogin.Result);
                         if (responseForRecipient != null)
                         {
-                            await Clients.Client(recipientConnection).SendAsync("NewDialog", responseForRecipient);
-                            await Clients.Client(recipientConnection).SendAsync("Notification", responseForRecipient.Name, responseForRecipient.LastMessage);
+                            if (recipientConnection != null)
+                            {
+                                await Clients.Client(recipientConnection).SendAsync("NewDialog", responseForRecipient);
+                                await Clients.Client(recipientConnection).SendAsync("Notification", responseForRecipient.Name, responseForRecipient.LastMessage);
+                            }
                         }
                     }
-                    await Clients.Caller.SendAsync("NewDialog", newDialog.FirstOrDefault(x => x.Name == message.PersonLogin));
+                    await Clients.Caller.SendAsync("NewDialog", newDialog.FirstOrDefault(x => x.Name != personLogin.Result));
+                }
+                else
+                    await Clients.Caller.SendAsync("Error", $"{personLogin.ErrorCode} {personLogin.Message}");
             }
-            else 
+            else
             {
                 var createdMessage = await _personalMessageService.SavePersonalMessageAsync(message);
                 if (createdMessage.Result != null)
                 {
-                    await Clients.Client(recipientConnection).SendAsync("NewMessage", createdMessage.Result);
-                    await Clients.Client(recipientConnection).SendAsync("Notification", createdMessage.Result.SenderLogin, createdMessage.Result.Content);
+                    if (recipientConnection != null)
+                    {
+                        await Clients.Client(recipientConnection).SendAsync("NewMessage", createdMessage.Result);
+                        await Clients.Client(recipientConnection).SendAsync("Notification", createdMessage.Result.SenderLogin, createdMessage.Result.Content);
+                    }
                     await Clients.Caller.SendAsync("NewMessage", createdMessage.Result);
                 }
                 else
@@ -138,7 +149,7 @@ namespace webapi.Hubs
 
             var groups = await _groupService.GetAllGroupsAsync(personId);
 
-            var dialogs = personalDialogs.Union(groups).OrderBy(x => x.Name);
+            var dialogs = personalDialogs.Union(groups).OrderByDescending(x => x.DateTime);
 
             if (dialogs != null)
                 await Clients.Caller.SendAsync("AllDialogs", dialogs);

@@ -14,5 +14,6 @@ namespace SignalRChat.Domain.Entities
         public int PersonId { get; set; }
         public int AddedByPerson {  get; set; }
         public DateTime AddedDate { get; set; }
+        public bool IsLeaved { get; set; }
     }
 }

@@ -14,7 +14,7 @@ namespace SignalRChat.Core.Service.Interfaces
         Task<OperationResult<GroupMessageResponse>> AddPersonToGroupAsync(MemberRequest request);
         Task<GroupResponse> GetGroupByIdAsync(int groupId);
         Task<OperationResult<MemberResponse>> GetAllMembersInGroupAsync(int groupId);
-        Task<bool> LeaveGroupAsync(int groupId, int personId);
-        Task<bool> ReturnToGroupAsync(int groupId, int personId);
+        Task<OperationResult<LeaveAndReturnGroupResponse>> LeaveGroupAsync(LeaveGroupRequest request);
+        Task<OperationResult<LeaveAndReturnGroupResponse>> ReturnToGroupAsync(ReturnGroupRequest request);
     }
 }

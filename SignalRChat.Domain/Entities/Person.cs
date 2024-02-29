@@ -8,5 +8,6 @@
         public string ConnectionId { get; set; } = string.Empty;
         public List<GroupChatRoom> Groups { get; set; } = new List<GroupChatRoom>();
         public List<PersonalMessage> PersonalMessages{ get; set; } = new List<PersonalMessage>();
+        public DateTime RegistrationDate { get; set; }
     }
 }

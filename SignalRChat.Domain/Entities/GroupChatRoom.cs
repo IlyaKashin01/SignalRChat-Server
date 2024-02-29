@@ -6,5 +6,6 @@
         public Person Person { get; set; } = new Person();
         public int PersonId { get; set; }
         public List<GroupMessage> GroupMessages { get; set; } = new List<GroupMessage>();
+        public DateTime CreatedDate { get; set; }
     }
 }
