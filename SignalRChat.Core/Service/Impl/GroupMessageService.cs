@@ -31,8 +31,8 @@ namespace SignalRChat.Core.Service.Impl
             var response = _mapper.Map<IEnumerable<GroupMessageResponse>>(messages);
             foreach (var message in response)
             {
-                var person = await _personRepository.GetByIdAsync(message.SenderId);
-                if (person != null) message.SenderLogin = person.Login;
+                var personLogin = await _personRepository.GetLoginByIdAsync(message.SenderId);
+                if (personLogin != null) message.SenderLogin = personLogin;
             }
             return response;
         }
@@ -49,14 +49,14 @@ namespace SignalRChat.Core.Service.Impl
             if (person != null) message.SenderLogin = person.Login;
             return message;
         }
-        public async Task<IEnumerable<GroupMessageResponse>> ChangeStatusIncomingMessagesAsync(int groupId)
+        public async Task<IEnumerable<GroupMessageResponse>> ChangeStatusIncomingMessagesAsync(int groupId, int senderId)
         {
-            var messages = await _groupMessageRepository.ChangeStatusIncomingMessagesAsync(groupId);
+            var messages = await _groupMessageRepository.ChangeStatusIncomingMessagesAsync(groupId, senderId);
             var response = _mapper.Map<IEnumerable<GroupMessageResponse>>(messages);
             foreach (var message in response)
             {
-                var person = await _personRepository.GetByIdAsync(message.SenderId);
-                if (person != null) message.SenderLogin = person.Login;
+                var personLogin = await _personRepository.GetLoginByIdAsync(message.SenderId);
+                if (personLogin != null) message.SenderLogin = personLogin;
             }
             return response;
         }

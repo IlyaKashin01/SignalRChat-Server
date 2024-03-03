@@ -42,9 +42,9 @@ namespace SignalRChat.Data.Repositories.Impl
             return false;
         }
 
-        public async Task<IEnumerable<GroupMessage>> ChangeStatusIncomingMessagesAsync(int groupId)
+        public async Task<IEnumerable<GroupMessage>> ChangeStatusIncomingMessagesAsync(int groupId, int senderId)
         {
-            var messages = await _context.GroupMessages.Where(x => x.GroupId == groupId && x.IsCheck == false).ToListAsync();
+            var messages = await _context.GroupMessages.Where(x => x.GroupId == groupId && x.IsCheck == false && x.SenderId != senderId).ToListAsync();
 
             foreach (var message in messages)
             {

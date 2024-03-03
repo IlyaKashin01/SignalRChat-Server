@@ -16,7 +16,7 @@ namespace SignalRChat.Data.Repositories.Impl
         {
             return await _context.Groups
                 .Where(x => x.PersonId == personId)
-                .Union(_context.GroupMembers.Where(x => x.PersonId == personId || (x.PersonId == personId && x.DeleteDate != null))
+                .Union(_context.GroupMembers.Where(x => x.PersonId == personId || (x.PersonId == personId && x.IsLeaved == true))
                 .Select(x => x.Group))
                 .ToListAsync();
         }
@@ -26,9 +26,9 @@ namespace SignalRChat.Data.Repositories.Impl
             return await _context.GroupMembers.Where(x => x.GroupId == groupId).CountAsync();
         }
 
-        public async Task<int> GetCountUnreadMessagesInGroupAsync(int groupId)
+        public async Task<int> GetCountUnreadMessagesInGroupAsync(int groupId, int personId)
         {
-            return await _context.GroupMessages.Where(x => x.GroupId == groupId && x.IsCheck == false).CountAsync();
+            return await _context.GroupMessages.Where(x => x.GroupId == groupId && x.IsCheck == false && x.SenderId != personId).CountAsync();
         }
 
         public async Task<string?> GetCreatorLoginAsync(int groupId)
@@ -47,7 +47,7 @@ namespace SignalRChat.Data.Repositories.Impl
 
         public async Task<GroupChatRoom?> LeaveGroupAsync(int groupId, int personId, bool isExcluded)
         {
-            var deletedPerson = await _context.GroupMembers.FirstOrDefaultAsync(x => x.GroupId == groupId && x.PersonId == personId);
+            var deletedPerson = await _context.GroupMembers.Include(x => x.Group).FirstOrDefaultAsync(x => x.GroupId == groupId && x.PersonId == personId);
 
             if (deletedPerson != null)
             {

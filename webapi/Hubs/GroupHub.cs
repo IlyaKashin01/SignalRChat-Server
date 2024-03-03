@@ -155,9 +155,9 @@ namespace webapi.Hubs
             else
                 await Clients.Caller.SendAsync("Error", "сообщений нет");
         }
-        public async Task ChangeStatusIncomingMessagesAsync(int groupId, string groupName)
+        public async Task ChangeStatusIncomingMessagesAsync(int groupId, string groupName, int senderId)
         {
-            var messages = await _groupMessageService.ChangeStatusIncomingMessagesAsync(groupId);
+            var messages = await _groupMessageService.ChangeStatusIncomingMessagesAsync(groupId, senderId);
             if (messages != null)
             {
                 await Clients.Group(groupName)
@@ -184,7 +184,7 @@ namespace webapi.Hubs
 
         public async Task AddPersonToGroup(MemberRequest request)
         {
-            var group = await _groupService.GetGroupDialogByIdAsync(request.GroupId);
+            var group = await _groupService.GetGroupDialogByIdAsync(request.GroupId, request.PersonId);
             if (group.Result != null)
             {
                 var memberMessage = await _groupService.AddPersonToGroupAsync(request);

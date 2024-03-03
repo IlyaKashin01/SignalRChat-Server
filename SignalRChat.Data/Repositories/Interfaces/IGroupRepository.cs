@@ -10,6 +10,6 @@ namespace SignalRChat.Data.Repositories.Interfaces
         Task<GroupChatRoom?> LeaveGroupAsync(int groupId, int personId, bool isExcluded);
         Task<GroupChatRoom?> ReturnToGroupAsync(int groupId, int personId);
         Task<int> GetCountMembersInGroupAsync(int groupId);
-        Task<int> GetCountUnreadMessagesInGroupAsync(int groupId);
+        Task<int> GetCountUnreadMessagesInGroupAsync(int groupId, int personId);
     }
 }

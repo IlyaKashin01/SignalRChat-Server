@@ -10,7 +10,7 @@ namespace SignalRChat.Core.Service.Interfaces
     {
         Task<OperationResult<Dialog>> CreateGroupAsync(GroupRequest request);
         Task<IEnumerable<Dialog>> GetAllGroupsAsync(int personId);
-        Task<OperationResult<Dialog>> GetGroupDialogByIdAsync(int groupId);
+        Task<OperationResult<Dialog>> GetGroupDialogByIdAsync(int groupId, int personId);
         Task<OperationResult<GroupMessageResponse>> AddPersonToGroupAsync(MemberRequest request);
         Task<GroupResponse> GetGroupByIdAsync(int groupId);
         Task<OperationResult<MemberResponse>> GetAllMembersInGroupAsync(int groupId);

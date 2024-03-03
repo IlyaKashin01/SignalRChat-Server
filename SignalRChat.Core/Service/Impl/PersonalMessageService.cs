@@ -39,6 +39,9 @@ namespace SignalRChat.Core.Service.Impl
                 {
                     _mapper.Map(lastMessage, dialog);
                     dialog.CountUnreadMessages = await _personalMessageRepository.GetCountUnreadMessagesInPersonalDialogAsync(personId, dialog.Name);
+                    var senderLogin = await _personRepository.GetLoginByIdAsync(lastMessage.SenderId);
+                    if (senderLogin != null) 
+                        dialog.SenderLogin = senderLogin;
                 }    
             }
             return response;
@@ -116,6 +119,7 @@ namespace SignalRChat.Core.Service.Impl
                     {
                         response.Add(_mapper.Map(lastMessage, dialog));
                         dialog.CountUnreadMessages = await _personalMessageRepository.GetCountUnreadMessagesInPersonalDialogAsync(message.Result.RecipientId, dialog.Name);
+                        dialog.SenderLogin = message.Result.SenderLogin;
                     }
                 }
             }

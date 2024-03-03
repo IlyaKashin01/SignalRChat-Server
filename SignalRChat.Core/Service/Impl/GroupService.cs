@@ -39,9 +39,11 @@ namespace SignalRChat.Core.Service.Impl
         {
             var member = _mapper.Map<GroupMember>(request);
             var person = await _personRepository.GetByIdAsync(request.PersonId);
-            if (person != null)
+            var group = await _groupRepository.GetByIdAsync(request.GroupId);
+            if (person != null && group != null)
             {
                 member.Person = person;
+                member.Group = group;
                 if (await _memberRepository.CreateAsync(member) != 0)
                 {
                     var addedPersonLogin = await _personRepository.GetLoginByIdAsync(request.AddedByPerson);
@@ -89,16 +91,19 @@ namespace SignalRChat.Core.Service.Impl
                 var lastMessage = await _groupRepository.GetLastGroupMessageAsync(group.Id);
                 if (lastMessage != null)
                 {
+                    var senderLogin = await _personRepository.GetLoginByIdAsync(lastMessage.SenderId);
                     _mapper.Map(lastMessage, group);
                     group.CountMembers = await _groupRepository.GetCountMembersInGroupAsync(group.Id);
                     group.CreatorLogin = await _groupRepository.GetCreatorLoginAsync(group.Id);
-                    group.CountUnreadMessages = await _groupRepository.GetCountUnreadMessagesInGroupAsync(group.Id);
+                    group.CountUnreadMessages = await _groupRepository.GetCountUnreadMessagesInGroupAsync(group.Id, personId);
+                    if (senderLogin != null)
+                        group.SenderLogin = senderLogin;
                 }
             }
             return response;
         }
 
-        public async Task<OperationResult<Dialog>> GetGroupDialogByIdAsync(int groupId)
+        public async Task<OperationResult<Dialog>> GetGroupDialogByIdAsync(int groupId, int personId)
         {
             var group = await _groupRepository.GetByIdAsync(groupId);
             if (group != null)
@@ -110,7 +115,7 @@ namespace SignalRChat.Core.Service.Impl
                     _mapper.Map(lastMessage, response);
                     response.CountMembers = await _groupRepository.GetCountMembersInGroupAsync(group.Id);
                     response.CreatorLogin = await _groupRepository.GetCreatorLoginAsync(group.Id);
-                    response.CountUnreadMessages = await _groupRepository.GetCountUnreadMessagesInGroupAsync(group.Id);
+                    response.CountUnreadMessages = await _groupRepository.GetCountUnreadMessagesInGroupAsync(group.Id, personId);
                 }
                 return new OperationResult<Dialog>(response);
             }
@@ -191,11 +196,11 @@ namespace SignalRChat.Core.Service.Impl
                             return OperationResult<LeaveAndReturnGroupResponse>.Fail(OperationCode.Error, "сообщение не сохранено в БД");
                     }
                     else
-                        return OperationResult<LeaveAndReturnGroupResponse>.Fail(OperationCode.EntityWasNotFound, "попытка исключить не существующего пользователя");
+                        return OperationResult<LeaveAndReturnGroupResponse>.Fail(OperationCode.EntityWasNotFound, "пользователь был исключен из группы, но его логин не найден и сообщение не сохранено в БД");
                 }
             }
             else
-                return OperationResult<LeaveAndReturnGroupResponse>.Fail(OperationCode.EntityWasNotFound, "попытка исключить пользователя из не существующей группы");
+                return OperationResult<LeaveAndReturnGroupResponse>.Fail(OperationCode.EntityWasNotFound, "пользователь исключен, но данные группы для дальнейших действий не найдены");
         }
 
         public async Task<OperationResult<LeaveAndReturnGroupResponse>> ReturnToGroupAsync(ReturnGroupRequest request)

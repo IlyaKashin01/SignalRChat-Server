@@ -28,7 +28,7 @@ namespace SignalRChat.Core.Mapping
             CreateMap<PersonalMessage, Dialog>()
              .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.LastMessage, opt => opt.MapFrom(src => src.Content))
-            .ForMember(dest => dest.DateTime, opt => opt.MapFrom(src => src.SentAt))
+            .ForMember(dest => dest.SentAt, opt => opt.MapFrom(src => src.SentAt))
             .ForMember(dest => dest.IsGroup, opt => opt.MapFrom(src => false));
 
             CreateMap<GroupChatRoom, Dialog>()
@@ -39,7 +39,7 @@ namespace SignalRChat.Core.Mapping
             CreateMap<GroupMessage, Dialog>()
              .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.LastMessage, opt => opt.MapFrom(src => src.Content))
-            .ForMember(dest => dest.DateTime, opt => opt.MapFrom(src => src.SentAt));
+            .ForMember(dest => dest.SentAt, opt => opt.MapFrom(src => src.SentAt));
 
             CreateMap<GroupRequest, GroupChatRoom>();
             CreateMap<GroupChatRoom, GroupResponse>();

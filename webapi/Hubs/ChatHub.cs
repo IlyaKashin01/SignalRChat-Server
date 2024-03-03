@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using SignalRChat.Common.OperationResult;
 using SignalRChat.Core.DTO;
 using SignalRChat.Core.DTO.Messages;
 using SignalRChat.Core.Service.Interfaces;
@@ -149,7 +150,7 @@ namespace webapi.Hubs
 
             var groups = await _groupService.GetAllGroupsAsync(personId);
 
-            var dialogs = personalDialogs.Union(groups).OrderByDescending(x => x.DateTime);
+            var dialogs = personalDialogs.Union(groups).OrderByDescending(x => x.SentAt);
 
             if (dialogs != null)
                 await Clients.Caller.SendAsync("AllDialogs", dialogs);
