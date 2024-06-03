@@ -60,6 +60,7 @@ namespace SignalRChat.Core.Service.Impl
 
             person.PasswordHash = BC.HashPassword(request.Password);
             person.Role = "user";
+           
             var result = await _personRepository.CreateAsync(person);
 
             return new OperationResult<int>(result);
