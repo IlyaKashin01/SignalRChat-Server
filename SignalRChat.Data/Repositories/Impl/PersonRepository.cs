@@ -2,6 +2,7 @@
 using SignalRChat.Data.Repositories.Interfaces;
 using SignalRChat.Domain.Entities;
 using System;
+using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -46,6 +47,18 @@ namespace SignalRChat.Data.Repositories.Impl
         public async Task<string?> GetLoginByIdAsync(int id)
         {
             return await _context.Users.Where(x => x.Id == id).Select(x => x.Login).FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> AddAvatarAsync(int id, string avatar)
+        {
+            var updatedPerson = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+            if (updatedPerson != null)
+            {
+                updatedPerson.Avatar = avatar;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
         }
     }
 }
