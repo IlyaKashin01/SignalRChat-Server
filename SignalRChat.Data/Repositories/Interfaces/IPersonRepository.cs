@@ -13,5 +13,8 @@ namespace SignalRChat.Data.Repositories.Interfaces
         Task<string?> GetLoginByIdAsync(int id);
         Task<IEnumerable<Person>> GetAllUsersAsync(int personId);
         Task<IEnumerable<Person>> GetAllUsersToAddGroupAsync(int groupId, int personId);
+        Task<bool> AddAvatarAsync(int id, string avatar);
+        Task<bool> SaveResetPassCodeAsync(int personId, int code);
+        Task<bool> ResetPasswordAsync(int personId, string passHash);
     }
 }

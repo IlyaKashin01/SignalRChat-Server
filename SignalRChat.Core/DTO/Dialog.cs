@@ -10,6 +10,7 @@ namespace SignalRChat.Core.DTO
     {
         public int Id { get; set; } 
         public string Name { get; set; } = string.Empty;
+        public string Avatar { get; set; } = string.Empty;
         public string LastMessage { get; set; } = string.Empty;
         public bool IsCheck { get; set; }
         public DateTime SentAt { get; set; }

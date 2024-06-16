@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SignalRChat.Common.Auth;
+using SignalRChat.Common.Email;
 using SignalRChat.Common.OperationResult;
 using SignalRChat.Data;
 using System.Reflection;
@@ -65,6 +66,8 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     };
 });
 var authOptions = configuration.GetSection("Auth").Get<AuthOptions>();
+var emailOptions = builder.Services.Configure<EmailOptions>(configuration.GetSection("Email"));
+
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

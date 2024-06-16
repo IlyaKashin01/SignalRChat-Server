@@ -16,6 +16,11 @@ namespace SignalRChat.Data.ModelConfig
             base.Configure(builder);
             builder.ToTable("person");
             builder.Property(e => e.Login).HasColumnName("login");
+            builder.Property(e => e.Avatar).HasColumnName("avatar");
+            builder.Property(e => e.FirstName).HasColumnName("first_name");
+            builder.Property(e => e.LastName).HasColumnName("last_name");
+            builder.Property(e => e.MiddleName).HasColumnName("middle_name");
+            builder.Property(e => e.ResetPassCode).HasColumnName("reset_pass_code");
             builder.Property(e => e.PasswordHash).HasColumnName("password_hash");
             builder.Property(e => e.Role).HasColumnName("role");
             builder.Property(e => e.Email).HasColumnName("email");

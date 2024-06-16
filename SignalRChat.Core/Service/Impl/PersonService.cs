@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
+using SignalRChat.Common.Auth;
 using SignalRChat.Common.OperationResult;
 using SignalRChat.Core.Dto.Auth;
 using SignalRChat.Core.Service.Interfaces;
@@ -10,11 +12,13 @@ namespace SignalRChat.Core.Service.Impl
     {
         private readonly IPersonRepository _personRepository;
         private readonly IMapper _mapper;
+        private readonly IDecodingJWT _decodingJwt;
 
-        public PersonService(IPersonRepository personRepository, IMapper mapper)
+        public PersonService(IPersonRepository personRepository, IMapper mapper, IDecodingJWT decodingJwt)
         {
             _personRepository = personRepository;
             _mapper = mapper;
+            _decodingJwt = decodingJwt;
         }
 
         public async Task<PersonResponse> FindPersonByLoginAcync(string login)
@@ -47,6 +51,27 @@ namespace SignalRChat.Core.Service.Impl
             if (!string.IsNullOrEmpty(login))
                 return new OperationResult<string>(login);
             return OperationResult<string>.Fail(OperationCode.EntityWasNotFound, "Пользователя не существует");
+        }
+
+        public async Task<OperationResult<bool>> AddAvatarAsync(IFormFile avatar, string token)
+        {
+            var personId = _decodingJwt.getJWTTokenClaim(token, "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/sid");
+            if (personId != null)
+            {
+                byte[] avatarBytes;
+                using (var memory = new MemoryStream())
+                {
+                    avatar.CopyTo(memory);
+                    avatarBytes = memory.ToArray();
+                }
+                var result = await _personRepository.AddAvatarAsync(Int32.Parse(personId), Convert.ToBase64String(avatarBytes));
+                if (!result)
+                {
+                    return OperationResult<bool>.Fail(OperationCode.EntityWasNotFound, "Не удалось добавить аватар");
+                }
+                return new OperationResult<bool>(result);
+            }
+            return OperationResult<bool>.Fail(OperationCode.EntityWasNotFound, "Пользователь не найден");
         }
     }
 }

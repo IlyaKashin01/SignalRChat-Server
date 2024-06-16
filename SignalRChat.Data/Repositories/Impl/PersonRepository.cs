@@ -12,7 +12,7 @@ namespace SignalRChat.Data.Repositories.Impl
 {
     public class PersonRepository : BaseRepository<Person>, IPersonRepository
     {
-        public PersonRepository(AppDbContext context): base(context) { }
+        public PersonRepository(AppDbContext context) : base(context) { }
         public async Task<Person?> FindByLoginAsync(string login)
         {
             return await _context.Users.FirstOrDefaultAsync(x => x.Login == login);
@@ -55,6 +55,30 @@ namespace SignalRChat.Data.Repositories.Impl
             if (updatedPerson != null)
             {
                 updatedPerson.Avatar = avatar;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<bool> SaveResetPassCodeAsync(int personId, int code)
+        {
+            var person = await _context.Users.FirstOrDefaultAsync(x => x.Id == personId);
+            if (person != null)
+            {
+                person.ResetPassCode = code;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<bool> ResetPasswordAsync(int personId, string passHash)
+        {
+            var person = await _context.Users.FirstOrDefaultAsync(x => x.Id == personId);
+            if (person != null)
+            {
+                person.PasswordHash = passHash;
                 await _context.SaveChangesAsync();
                 return true;
             }

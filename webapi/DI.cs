@@ -1,4 +1,5 @@
-﻿using SignalRChat.Core.Service.Impl;
+﻿using SignalRChat.Common.Auth;
+using SignalRChat.Core.Service.Impl;
 using SignalRChat.Core.Service.Interfaces;
 using SignalRChat.Data.Repositories.Impl;
 using SignalRChat.Data.Repositories.Interfaces;
@@ -21,6 +22,9 @@ namespace webapi
         {
             return services
                 .AddScoped<IAuthService, AuthService>()
+                .AddScoped<IPasswordService, PasswordService>()
+                .AddScoped<IEmailService, EmailService>()
+                .AddScoped<IDecodingJWT, DecodingJWT>()
                 .AddScoped<IPersonalMessageService, PersonalMessageService>()
                 .AddScoped<IPersonService, PersonService>()
                 .AddScoped<IGroupService, GroupService>()

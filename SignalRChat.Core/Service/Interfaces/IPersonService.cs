@@ -1,4 +1,5 @@
-﻿using SignalRChat.Common.OperationResult;
+﻿using Microsoft.AspNetCore.Http;
+using SignalRChat.Common.OperationResult;
 using SignalRChat.Core.Dto.Auth;
 using SignalRChat.Domain.Entities;
 using System;
@@ -16,5 +17,6 @@ namespace SignalRChat.Core.Service.Interfaces
         Task <PersonResponse> GetPersonByIdAsync(int personId);
         Task<IEnumerable<PersonResponse>> GetAllUsersToAddGroupAsync(int groupId, int personId);
         Task<OperationResult<string>> GetLoginByIdAsync(int personId);
+        Task<OperationResult<bool>> AddAvatarAsync(IFormFile avatar, string token);
     }
 }
